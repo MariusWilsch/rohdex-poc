@@ -1,0 +1,132 @@
+---
+description: Use this ALWAYS if the user mentions AI Layer / LiteLLM / Anthropic / Open AI / Sonnet
+globs: 
+alwaysApply: false
+---
+<xml_output>
+<?xml version="1.0" encoding="UTF-8"?>
+<litellm_guide>
+    <introduction>
+        <description>LiteLLM is a unified interface for calling 100+ LLM APIs using the OpenAI input/output format. It provides consistent response handling, manages API keys, tracks usage costs, and supports advanced features like routing, caching, and fallbacks.</description>
+    </introduction>
+
+    <usage_guide>
+        <guide_instructions>
+            <instruction>For sections with direct code snippets, use them immediately in your projects</instruction>
+            <instruction>For link-based sections, use the "scrape" tool to fetch the latest documentation</instruction>
+            <instruction>If scrape tool isn't available, note links that need to be accessed</instruction>
+            <instruction>Judge which links to scrape based on integration needs</instruction>
+            <note>All information has a "Last Updated" timestamp</note>
+        </guide_instructions>
+    </usage_guide>
+
+    <setup>
+        <installation>
+            <command>pip install litellm</command>
+            <configuration_method>
+                <description>Configure API keys using Pydantic BaseSettings</description>
+                <code_example>
+                    <![CDATA[
+from pydantic import BaseSettings, SecretStr
+from functools import lru_cache
+
+class LiteLLMSettings(BaseSettings):
+    OPENAI_API_KEY: SecretStr
+    ANTHROPIC_API_KEY: SecretStr
+    DEEPSEEK_API_KEY: SecretStr
+    # Additional configuration options
+                    ]]>
+                </code_example>
+            </configuration_method>
+        </installation>
+    </setup>
+
+    <completion_calls>
+        <basic_usage>
+            <description>Core function is `completion()` following OpenAI chat completions format</description>
+            <providers>
+                <provider name="OpenAI">
+                    <model>gpt-4o</model>
+                    <model>gpt-3.5-turbo</model>
+                </provider>
+                <provider name="Anthropic">
+                    <model>claude-3-sonnet-20240229</model>
+                </provider>
+                <provider name="DeepSeek">
+                    <model>deepseek-chat</model>
+                </provider>
+            </providers>
+        </basic_usage>
+    </completion_calls>
+
+    <advanced_features>
+        <vision_support last_updated="February 24, 2025">
+            <description>Support for vision models with base64 image encoding</description>
+            <supported_providers>
+                <provider>OpenAI</provider>
+                <provider>Anthropic</provider>
+            </supported_providers>
+        </vision_support>
+
+        <json_mode last_updated="February 24, 2025">
+            <description>Request structured JSON outputs from models</description>
+            <methods>
+                <method>response_format parameter</method>
+                <method>Pydantic model schema validation</method>
+            </methods>
+        </json_mode>
+
+        <prompt_caching last_updated="February 24, 2025">
+            <description>Prompt caching to reduce latency and costs</description>
+            <supported_providers>
+                <provider>Anthropic</provider>
+            </supported_providers>
+        </prompt_caching>
+    </advanced_features>
+
+    <models>
+        <provider name="OpenAI">
+            <model_list>
+                <model>gpt-4o</model>
+                <model>gpt-4-turbo</model>
+                <model>gpt-3.5-turbo</model>
+            </model_list>
+        </provider>
+        <provider name="Anthropic">
+            <model_list>
+                <model>claude-3.5-sonnet-20240620</model>
+                <model>claude-3-opus-20240229</model>
+            </model_list>
+        </provider>
+        <provider name="DeepSeek">
+            <model_list>
+                <model>deepseek-chat</model>
+                <model>deepseek-coder</model>
+            </model_list>
+        </provider>
+    </models>
+
+    <integrations>
+        <providers>
+            <provider>OpenAI</provider>
+            <provider>Anthropic</provider>
+            <provider>DeepSeek</provider>
+        </providers>
+    </integrations>
+
+    <maintenance>
+        <update_guidelines>
+            <step>Re-scrape links when documentation changes</step>
+            <step>Update "Last Updated" timestamps</step>
+            <step>Update code snippets for major version changes</step>
+            <step>Add new provider setups as they become common</step>
+        </update_guidelines>
+    </maintenance>
+
+    <optional_features>
+        <feature>Router Implementation</feature>
+        <feature>Logging & Observability</feature>
+        <feature>Embedding API Usage</feature>
+    </optional_features>
+</litellm_guide>
+</xml_output>

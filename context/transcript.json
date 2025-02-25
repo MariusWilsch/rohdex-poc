@@ -1,0 +1,358 @@
+[
+  {
+    "text": "Dann schaffen wir.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "So. Okay, ich habe dir den Zugang für Rodex gegeben. Kannst du bitte kurz drauf schauen, ob das funktioniert oder nicht.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Screen Time passt. Ich habe schon gesehen.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Teilst du oder nicht so cool. Ich habe mir das kurz angeschaut, was du gemacht hast zum open Wetter ein. Dann sende ich das weiter morgen früh und schaue mal was die Antwort.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Welcher E Mail. Hast du das geteilt? Ja, genau. Also letztendlich das Thema. Also er hat morgen Open Map UI. Vielleicht habe ich ein bisschen reingeschaut. Letztendlich man kann mit dem OEC haben die integriert seit wir sind bei. Ist ja auch mal ein Thema. Wollen wir einfach immer jetzt erstmal auf bleiben oder sollen wir da auch updaten, wenn Sachen kommen?",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Keine Ahnung. Ich glaube die Updates werden relativ einfach vonstatten gehen, wenn wir die Zugänge haben. Über iFrame das neue Update zu pushen ist eigentlich nicht so schwer. Wir müssen mal schauen, was die Updates bringen überhaupt. Also welche Vorteile bringen und die Name zu Ita. Zu ita kommen wir noch später, aber letztendlich.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Genau. Ich gehe gerade auf Schädel.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Jetzt habe ich es nochmal gemacht. Genau. Ich teile mal mein Drive.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Ich sehe es ja.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Okay, super. So schau mal hier haben wir so aufgeteilt. Das ist ein Kunde, ein einziger Kunde, der heißt light feather and down Association. Das ist ein Kunde Corporation. Okay. Und von diesem Kunden haben wir beispielhaft drei Exporte. Der eine Export heißt irgendwie 24 10 270 die zwei. Dann gibt es den 22 1003 drei ein. Das sind die zwei und 22 10. Die hängen immer zusammen. Das sind jeweils drei Export, die die gemacht haben wird Export, ich mein container Export. Okay.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Also ein könnte sagen die gleichen IDs. Da ist immer ein physischer Container.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Genau, genau. So, lass uns mal reingehen, was hier steht. Und zwar steht hier vor folgendes wir haben hier fangen immer mit diesen zwei Dokumenten an. Partie und Partie. OK. Das sind Excel Files, die von der digitalen Waage generiert werden. Die in der Fabrik haben. Sieht folgendermaßen aus, wenn du das siehst. Wir haben insgesamt 14 Säcke, die gewogen wurden. Das ist das Datum, wo das gewogen wurde, die Uhrzeit, wann das gewogen wurde. Das ist eine Nr. Also diese die Partienummer steht hier immer. Das ist die Nr. Diese drei sechs zwei zwei vier. So heißt auch das Dokument. So und was für uns wichtig ist, das ist jeweils diese Zahl. Und zwar sind das Kilos sozusagen, was jeder einzelne Ballen wiegt. Jeder einzelne Ballen wiegt hier 272,8 Kilo. OK.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Und warum ist es doppelt.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Hier auch noch kriegen sie es so von der Waage raus. Lass uns das nochmal hier nochmal reinschauen. Das ist die andere Partie.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Also wir sagen k ist Kilo, also Column k ist Kilo. Und die sind relevant.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Um dir das zu erklären, wie das funktioniert. Es kommt eine Bestellung von einem Kunden, die bestellen Daunen. Das sind verschiedene Daunen, die die machen. Diese Daunen werden mit einem riesigen Container verschifft, so ein Lkw Container. Und diesen Lkw Container kommen unterschiedliche Ballen. Das sind solche riesengroßen, die gepresst werden, gewogen werden und dann werden die verschickt. Von einer Art von der Daune kann in einem Container unterschiedliche Anzahl von diesen Ballen sein, wie du siehst. Also hier haben wir von einer bestimmten Art, von einer bestimmten Qualität der Daune haben wir insgesamt 1818 Ballen und mit jeweils unterschiedliche Kiloanzahl von der Qualität, was wir zuvor angeschaut haben, gibt es eben 14 Ballen mit der Kiloanzahl pro Ballen. Und in einem Container werden sozusagen zwei Partien verschickt. Einmal 14 Ballen von der Qualität und einmal 18 Ballen von der anderen Qualität. Dann wird der Container zugemacht. Der Container hat eine Nr. Eine ganz spezifische. Und wenn der Container zugemacht wird, dann gibt es noch ein Siegel. Es gibt noch einen Siegelstempel, aber das kommt, das zeige ich dir gleich auch. Was wir brauchen ist, wir müssen aus diesen, aus diesen Partietabellen, es gibt zwei Partietabellen, die wir gerade gesehen haben, es kann aber sein, dass es drei Partietabellen sind, müssen wir eine Packing List erstellen. Das ist das hier, das Dokument. Und wenn wir jetzt in das Dokument reingehen, dann werden wir folgendes sehen. Das ist sozusagen das wichtigste Kerndokument, was es gibt.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Das heißt immer Packing List mit einer ID dahinter.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Genau. So, was wir hier sehen, ist Packing List according to invoice. Die Invoice Number bekommen wir auch, also das müssen wir dann alles später ergänzen. Genau, das ist die Containernummer, die kriegen wir auch am Tag der Lieferung mit. Das ist die Containernummer, die hier eingetragen werden muss. Und jetzt sehen wir, dass das hier der Packing List entspricht, der Partie entspricht. Also wir haben hier according to sample number 66203 und dreiig. Und wenn wir das nochmal anschauen, das ist das hier, dreiig tausend 203 und dreiig. Was sehen wir? Wir sehen, dass es hier 18 Ballen sind. In der Packing Liste sind es auch 18 Ballen insgesamt. Wir sehen hier, dass das Gewicht von diesen 18 Ballen entspricht in der Summe dreiig tausend 980. Nein, hier, schau, siehst du, drei neun null, neun acht null. Das ist das, was wichtig ist. Dann gibt es eine Formel, die das automatisch umrechnet in pound, also einmal in Kilo und einmal in LB, aber das ist alles schon vorprogrammiert in der Tabelle. Da gibt es hier noch eine Teer. Teer ist die Säcke, in die es verpackt ist. Die haben auch ein Gewicht. Das sehen wir hier auch in der Partie. Siehst du, in der Partie haben wir auch, wissen wir, dass jeder Sack so 3,6 Kilo wiegt. Dann gibt es welche, die wiegen zwei und dann gibt es welche, die liegen so zwei, insgesamt 52 Kilo. Und genau das hier sehen wir in der Packing Liste auch. Wir sehen, dass die Säcke unterschiedlich viel wiegen und insgesamt wiegen die 52 kg. Das wird sozusagen von der Partie übertragen. Also h ist tear, k ist die Waage. Tatsächlich, was wiegen die Daunen?",
+    "speaker": "Roman"
+  },
+  {
+    "text": "K ist in unserem Falle B imp.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Genau, genau. Und dann gibt es das Nettogewicht. Aber das Nettogewicht wird auch automatisch mit der Tabelle abgerechnet. Das ist einfach das Gewicht. Was wiegt dieser Ballen? Minus was wiegt die Verpackung? Und das ist das Gewicht. Genau 2204. Dieser Faktor, was ist das für ein Scheiß? Das kann ich dir. Diesen Faktor kann ich dir leider nicht beantworten, aber ich glaube, der ist immer gleich, dieser Faktor.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Ist das vielleicht der Faktor, um auszurechnen, Pounds auszurechnen? Kann sein, weil wenn du hier auf die Pounds gehst, ist ja fast immer die doppelte. So, mach mal 267,40.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Genau, genau, genau richtig. Das ist richtig erfasst. Also Faktor bleibt immer gleich. Und dann haben wir die LBs und dann die Summe davon. In dieser Packing List haben wir aber nicht nur die erste Partie drin, sondern wir haben auch die zweite Partie drin. Und genau dasselbe passiert auch. Wir haben hier GRS recycled Grey Dao. Und dann übertragen wir genau dasselbe. Wir haben hier in der Packung 14 Bundles, wie auch in dem Dokument. Sechs und dreiig tausend 224. Schauen wir das hier an. Sechs und dreiig tausend 224. Und nach genau derselben Logik. Wir haben 14 Bündel. Wir haben das Gewicht hier. Das Gewicht ist. Das Gewicht ist in der drin hier. Das ist hier die Verpackung von dem, die Verpackung von wie viel die Verpackung wiegt. Und dann wird genau dasselbe gemacht. Also was sehen wir hier? Wir haben hier die Growth Weight, die Summe davon, umgerechnet in lbs. Wie viel wiegt die Verpackung? Summe. Wie viel wiegt das Nettogewicht? Das ist das eine abgezogen von dem anderen, der Faktor. Und also das ist die erste Aufgabe sozusagen aus diesen zwei Partien das Dokument Packing List zu erstellen. OK.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Und wenn wir visiten, eine willst du noch zu Ende erklären oder soll ich mal mit Fragen anfangen?",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Du kannst mit Fragen anfangen.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Okay. Was sind wirklich die Dokumente, die wir bekommen? Also wenn ich, worauf ich hinaus will, ist, dieses Packing List Dokument, das gibt es nicht. Das wird von uns erstellt, wenn die E Mail kommt.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Genau. Oder wir bekommen die Packing List als leeres Dokument. Und wir würden sozusagen per E Mail die Backing List bekommen, plus die Anzahl von Partietabellen, die es gibt. Es kann sein, dass es eine Partie ist, es kann sein, dass es vier Partien sind. Je nachdem. Ich weiß nicht. Das wissen die auch nicht im Vorfeld. Und dann müssen wir das Ganze dementsprechend übertragen.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Also wenn ich es meinen eigenen Worten erkläre, wir bekommen ganz normal, wie heißt das andere Dokument? Packing List. Und Packing.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Also eine Packing List besteht aus mehreren Partien.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Okay. Also wenn ich es mit eigenen Worten erkläre, sozusagen der Input ist die Partie.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Genau.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Oder Partien ist die Packing List.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Genau. Lass uns das mal kurz schließen und in die zweite Sendung reingehen. Okay. Dann würde analogisch verstehen. So, da haben wir diese Federn schon wieder. Schau mal, wir haben jetzt die. Wir haben jetzt diese Sendung uns angeschaut, die 24 10 null zwei sieben null. Und schauen wir uns mal die an, was dort da ist. So, da haben wir schon mal drei Partien. Das heißt, in einem Container werden drei verschiedene Sorten verschickt. Jetzt anschauen, die erste Partie, die zweite, die dritte. Genau. Dann sehen wir, die erste Partie besteht aus 13 Ballen. Hier ist das Gewicht und hier ist was das wiegt. Was die Verpackung wiegt, ist ein J. Ist OK. Genau. So, die nächste Partie. Das sind wahrscheinlich.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Und wir können darauf vertrauen, dass die Columns immer die gleichen sind, oder?",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Ja, ja. Das kommt immer von dieser digitalen Waage. Da haben sie keinen Einfluss drauf. Schau mal, siehst du, das ist Partie drei, acht acht null. Hier haben wir acht Ballen, das ist das Gewicht. K und i ist ter. So, und die letzte Partie sind neun Ballen und das ist Gewicht und das ist ter. OK, pass. Gut. Jetzt haben wir drei Partien hier. Da gehen wir in die Vorlage ausgefüllt. Hier ist die Packing List. Und in der Packing List sollten wir jetzt drei Partien wiedererkennen. Was sehen wir hier in der Packing List? Wir sehen einmal die erste Partie, die drei und dreiig tausend 906. Genauso aufgeschlüsselt wie zuvor. Wir haben die Partie mit 13 Ballen, die drei 3876. Und dann die letzte, die drei, 3880 mit neun Ballen. Und wir sehen immer, das ist Teer, das ist das Gewicht. Gewicht, Ter, Gewicht.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Und woher kriegen wir den? Weil es immer GRS recycled grey down.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Das zeige ich dir gleich auch, woher wir das bekommen. OK.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Dann nehme ich mal an, die Naming Convention soll auch mal Parkingliste dazu. Und dann die ID sein.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Immer dasselbe. Wir bekommen von dem Kunden diese Dateien, also die Partie, Partie, Partie. Dann bekommen wir die leere Vorlage von der Packing List und es gibt so eine Wahrheitsdatei. OK, in der Wahrheitsdatei steht sozusagen alles drin, was zu dem Kunden benötigt wird. Wenn wir die Wahrheitsdatei mal aufmachen, dann werden wir folgendes sehen. Das ist hier dieser Reiter V. Lieferung, Lieferung 223, 302 und dreiigste. Das ist das, was wir alles benötigen. So, was sehen wir hier? Wir sehen hier, dass in diesem Fall ist der Container besteht aus drei verschiedenen Packing, aus drei verschiedenen Partien. Das sind die Nummern der Partien. OK, alles klar. Das ist jeweils die Beschreibung der Partie. Für uns ist wichtig, dass die Beschreibung zwei genannt wird. Also was kommt in die Packing List? In die Packing List kommt zunächst mal Partie mit der Nr. Drei und dreiig tausend 906. Schauen wir uns an. Das ist das erste. Partie 3000003 und dreiig tausend 906. Steht hier in der Tabelle. Was ist das für eine Geschichte? Das ist das hier. Das ist GRS Recycled Graydao. Das kommt hier rein. GRS Recycle Gray. Da. Was brauchen wir noch? Wir brauchen sonst gar nichts jetzt aktuell, weil in der Packing List sozusagen ist dann alles, was mit den Gewichten zusammenhängt, kriegen wir ja von der Partie. Die Partie drei und dreiig tausend 906. Also das kriegen wir in der Packing List. Dann schauen wir noch mal in diese Wahrheitstabelle und sagen, okay, was ist die zweite Partie? Die zweite Partie hat die Nr. 3000003 und dreiig tausend 876. Das übertragen wir dann hierhin. Drei und dreiig tausend 876. Was ist das für ein Produkt? Das Produkt lautet GRS Washed Recycle DAO. Schauen wir, ob das stimmt. GRS wash recycle down. Richtig. Und dann müssen wir sozusagen in diese Partie schauen, in die, das ist die 3000876 und dann alles übertragen. Wie viele Ballen gibt es? 13. OK, in die Packliste 13 Ballen. Was ist das Gewicht? Das Gewicht ist hier. Also übertragen wir das hier hin. Cross Weight. Was ist der? Ist hier.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "J.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Oder i war das, aber irgendwie ist es hier verschoben. Hat er hier jetzt Scheiß eingegeben? Weil es ist vier, fünf, sieben. Irgendwas stimmt hier mit Ter nicht, aber da hat er sich vertippt wahrscheinlich.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Das macht die Waage, oder?",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Macht auch die Waage, aber warte mal kurz. In die Packingliste 13 Ballen. Genau. Vier. Vier. Das ist in J drin, oder? Normalerweise macht es die Waage, aber ich habe den gebeten, die Dokumente aufzubereiten, aber irgendwie ist da wahrscheinlich irgend so ein Scheiß passiert bei der Aufbereitung.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Glaubst du, was cool wäre, wenn wir einfach in dieser Partie natürlich auch ein header Column hätten. Aber denkst du, das wird nicht passieren?",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Oder was meinst du mit Header Column?",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Genauso. Also hier, wenn du z.B. auf Tackingless gehst.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Achso, ne, das bekommt er so von.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Der Waage, aber kann man nichts machen.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Das bekommt er so von der industriellen Waage sozusagen.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Vielleicht dachte ich bei der Software von der Waage irgendwie was sagen.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Ich glaube, das ist ein bisschen komplexer. So, und dann schauen wir hier noch mal in die Tabelle. Was ist die dritte Verpackung? Die dritte Verpackung ist die Partie mit der Nr. Drei und dreiig tausend 880. Das ist die Partie drei und dreiig tausend 880. Wie viele Ballen gibt es? Es gibt neun insgesamt. Und dann in der Packing List sehen wir 880. Es gibt neun. Hier sind die Gewichte, hier ist Teer. Dann ist das eine von dem anderen abgezogen. Faktor. Das ist die erste Aufgabe für uns. Er schickt uns per E Mail die Partien, also aus der Waage diese Dokumente und dann diese Wahrheitstabelle, wo alles noch drin steht. Und wir sollen daraus eine Packing Liste erstellen.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Das heißt, für die erste Aufgabe können wir die Docs Dokumente ignorieren. Und es ist wirklich nur die Sheet Dokumente, einmal die Wahrheitsdatei und einmal x Partie Dateien, die dann sozusagen alle in eine Packing List Datei zusammenkommen. Und bei der Wahrheitsdatei ist nur die letzte Tabelle weiter wichtig.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Ist V irgendwas absolut, absolut richtig. Ja, absolut richtig.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Und nur die gelben Hintergrund.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Ja, das ist auch. Also hier. Moment mal. Gelb, das auch richtig gelb. So, die Sachen sind wichtig. Das ist die Nr. Das sehen wir hier. Das ist die Beschreibung, die sehen wir hier. Das ist die Beschreibung Nr. Genau das es drei Teile sind. Dann gibt es hier noch den Container, den 422 27 sechs. Das ist das hier Containernummer und der Containernummer Los Angeles. Das bleibt immer gleich, weil es immer beim Kunden immer gleich bleibt. Der Kunde empfängt die Ware immer bei Los Angeles. Das ist dieser Kunde, bei dem wir gerade sind. Das ist immer bei dem Kunden konstant.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Also.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Genau. Cool.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Noch irgendwelche weiteren Informationen zu Aufgabe eins?",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Ja, und diese hier, wie du siehst, Packing List Accordance with Invoice. Zwei, zwei, drei. Die Nr. Da die Nr. Steht auch hier in der Wahrheitstabelle. Das ist so heißt die Wahrheitstabelle und hier steht es auch. Das war es eigentlich für das erste, weil wenn wir das schaffen, wenn wir das geschafft haben, dann aus der Packing List werden dann weitere Dokumente erstellt, wie z.B. wie z.B. das hier, dieses DSV.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Ist das jetzt aber noch im Scope oder ist das schon Autoscope für den POC?",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Das ist dann für den. Wie soll ich das sagen? Also was er haben möchte, ist, dass alle Dokumente, die hier in den Vorlagen ausgefüllt, dass die ganzen Dokumente, die hier stehen, automatisch generiert werden. Aber die ganzen Dokumente werden nur dann automatisch generiert, wenn diese Packing List auch richtig generiert wurde. Das ist das Schlüsselelement. Weil dieser DSV, da siehst du Description of Goods, also das alles zuvor bleibt immer konstant. Das bleibt immer konstant, bis auf den Container, den kannst du aus der Wahrheitstabelle entnehmen. Und diese Siegelnumber, diesen Siegel, den kannst du auch aus der Wahrheitstabelle entnehmen. Das ist Siegel ist hier 11, Container ist 10, Bestellnummer ist neun und mit welchem Schiff das ganze verschifft wird, ist 12.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "OK, nur aber dass ich das richtig verstehe, weil du hast sozusagen gesagt, das ist Aufgabe eins.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Aufgabe eins, um dem zu zeigen, dass wir das können. Aufgabe eins ist einfach zu zeigen, dass wir das können. Wir bekommen diese, diese, die Partien, die Wahrheitstabelle und sollen dann die Packing Disks generieren.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Und das ist erstmal der Scope für das erste Angebot. Und Docs erstmal außen vor, ja?",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Ne, das ist einfach nicht der Scope für das erste Angebot, das ist einfach für uns, um denen zu zeigen, dass es überhaupt geht. Das ist einfach zu verstehen, können wir das oder können wir das nicht? Und wenn wir das zeigen können, ja, wir können das, dann machen wir ein Angebot für die komplette Erstellung der Dokumente.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Und wie beweisen wir dem, dass wir es können?",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Was denn?",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Dass wir schon anfangen mit der Programmierung, bevor wir ein Angebot schreiben, oder.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Wir müssen nicht programmieren, aber wir müssen erstmal schauen, dass wir das können oder nicht können.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Ah, OK, verstehe. Das heißt, der nächste Schritt ist jetzt eine Art Dokument auszufertigen, die die Strategie beschreibt, um Aufgabe eins oder einfach zu.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Testen, ob das funktioniert oder nicht. Funktioniert halt für uns auch. Also ich meine, wenn wir das können, dann wird das sozusagen sowieso Teil des größeren Angebots sein, für was der Kunde bezahlt. Aber wenn wir den ersten Schritt nicht können, dann wird das große Ganze auch nicht funktionieren. Verstehst du, was ich meine?",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Ja, klar. Ich verstehe noch nicht ganz genau, was du unter. Ob wir das Können verstehen. Ob wir das theoretisch können im Sinne von so und so würde ich es.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Machen, ob wir das tatsächlich hinbekommen, drei Excel Files, die Wahrheitstabelle und die Tools über E Mail zu bekommen und daraus eine Packing List zu generieren.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Richtig, weil ich dachte, das ist genau der POC, den wir machen als Angebot zu ihm, um das zu beweisen.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Das haben wir anders besprochen. Wir haben gesprochen, dass wir sozusagen ihm das zeigen, dass es geht. Und wenn wir zeigen, dass es geht, dann wird Pilot mit allen möglichen Dokumenten, die dort noch vorhanden sind, als Angebot versendet.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Das heißt, jetzt müssen wir erstmal in die kostenlose Vorleistung gehen mit Programmierarbeit.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Genau. Weil der nicht glaubt, dass das machbar ist oder nicht machbar ist. Weil das ist der essentielle Punkt. Wenn wir schaffen, diese Packing List zu erstellen, dann wird sozusagen eine ganze Beauftragung stattfinden. Wir müssen das einfach zeigen, beweisen, dass es geht.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Okay, und du bist damit im Reinen, dass wir da jetzt kostenlos vorarbeiten.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Ja, weil das dann sozusagen sowieso Teil des Packages sein wird. Also ich meine, wir arbeiten vor, aber das ist ja Teil des gesamten Angebots. Wir müssen sowieso das machen. Verstehst du, was ich meine?",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Ich verstehe, was du meinst. Ich verstehe nicht, wo die Sorge zu sagen ist, hey, guck mal, wir machen ein Angebot und dann, wenn wir es nicht schaffen, dann muss er nicht zahlen, wenn wir es schaffen. Also. Aber ja, ich dachte, so war es auch kommuniziert. Sozusagen der Proof of Concept ist, dass wir das erreichen. Und wenn wir es erreicht haben, können wir die letztendlich kommt ja aufs Gleiche hinaus. Richtig. Dass wir die Stunden, die wir jetzt investieren, an ihm verrechnen.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Genau.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Das heißt, ob wir jetzt ein Angebot schreiben oder nicht. Ganz genau. Wo der Unterschied ist.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Das ist einfach rein psychologisch ein Unterschied. Weil dann sagen wir, weißt du, das ist ja für den Kunden sozusagen, wir bekommen sowieso das Geld am Ende, wenn das funktioniert. Aber rein psychologisch ist für den Kunden, wir okay, so funktioniert, wir zeigen es dir, das geht sowieso, der kann das sowieso nicht nutzen ohne uns. Also der kann ja uns nicht sozusagen. Der benötigt das, der braucht das. Aber es gibt einfach ein sicheres Gefühl. Das war so ähnlich, weißt du, wie mit Iter war das genau dasselbe. Wir okay, wir sagen dir, wir erreichen eine Genauigkeit von so und so viel %, das garantieren wir. Und wenn wir das erreichen, dann wird abgerechnet. Hier ist es auch so, wir zeigen dir, dass es funktioniert nur für einen Teil. Wenn das funktioniert, wir können das zeigen, dann hat er ein besseres Gefühl und dann weiten wir das aus auf die ganzen Dokumente.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Richtig. Bei ITA hatten wir ja technisches Angebot davor geschrieben für 800.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Stimmt, ja. Für. Nein, die €800 waren für die. Warte mal, für was war das? Das war. Das war für Implementierung von Docker und Gwen. Und für die. Das war ja nicht für das Rack, sondern das war ja nur um alles vorzubereiten.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Ja, ja, nur dass es halt letztendlich auf das gleiche hinauskam, dass er das nicht zahlt, wenn die 95 % nicht da sind. Also nach der Logik. Also by the way, Roman, gegen dich argumentieren oder so, nur letztendlich, die €800 hat er eh nicht bezahlt, weil er, wie du ja gesagt hast, er bezahlt ihn nur, wenn die 95 % erreicht wurden. Das heißt letztendlich, auch wenn es anders kommuniziert wurde und wir eigentlich das erreicht haben, was wir gesagt haben, Quen und Docker, hätte er trotzdem nicht geteilt. Also indirekt kommt aufs gleiche hinaus. Die 95 % waren der Ausschlusskriterium, scheißegal was wir da ins Angebot reingeschrieben haben.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Genau. Und ja, ich bin gerade dabei so einen Kundenstamm aufzubauen, weil der hat sehr viel Bedarf, der Typ, in seiner Fabrik mit den Daunen, da gibt es sehr viel Bedarf für Automatisierung, KI Implementierung und alles mögliche. Und ich glaube das ist so eine Strategie, die ein bisschen dem entgegenkommt, weißt du, weil die haben, also ich habe das von allen Kunden, die fühlen sich immer ausgenutzt, von Developern, IT Unternehmen, allen möglichen Firmen, weil die, keine Ahnung, zu viel zahlen, dann funktioniert das nicht wie zuvor mit diesem anderen KI System bei ITER. Und die suchen einfach nach einem fairen Partner, der reingeht und okay, ich zeig dir in einem ganz kleinen Scope, dass es geht und dann lass uns das ganze ausweiten.",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Wir haben nur noch 1 Minute, deswegen ganz kurz, ich wähle mich nochmal.",
+    "speaker": "Marius"
+  },
+  {
+    "text": "Einwand?",
+    "speaker": "Roman"
+  },
+  {
+    "text": "Ja.",
+    "speaker": "Marius"
+  }
+]
