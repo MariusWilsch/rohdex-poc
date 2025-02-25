@@ -4,6 +4,9 @@ from app.utils.file_processor import (
     load_wahrheit,
     generate_packing_list,
 )
+from rich.console import Console
+
+console = Console()
 
 
 class PackingListService:
@@ -32,6 +35,8 @@ class PackingListService:
             str: The generated packing list content as a CSV-formatted string, with all
                 placeholders replaced with actual data from the input files.
         """
+        console.print("[bold blue]Starting packing list generation process...[/]")
+
         # Read all partie files into memory
         partie_contents = []
         for pfile in partie_files:
@@ -43,20 +48,29 @@ class PackingListService:
                 )()
             )
             await pfile.seek(0)  # Reset file pointer for potential reuse
+            console.print(f"[green]Loaded partie file:[/] [cyan]{pfile.filename}[/]")
 
         # Read wahrheit file into memory
         wahrheit_content = await wahrheit_file.read()
         await wahrheit_file.seek(0)  # Reset file pointer for potential reuse
+        console.print(
+            f"[green]Loaded wahrheit file:[/] [cyan]{wahrheit_file.filename}[/]"
+        )
 
         # Read template from uploaded file
         template_content = (await template_file.read()).decode("utf-8")
         await template_file.seek(0)  # Reset file pointer for potential reuse
+        console.print(
+            f"[green]Loaded template file:[/] [cyan]{template_file.filename}[/]"
+        )
 
         # Generate packing list in memory
-        result_content = generate_packing_list(
+        console.print("[bold blue]Processing files with AI...[/]")
+        result_content = await generate_packing_list(
             partie_contents=partie_contents,
             wahrheit_content=wahrheit_content,
             template_content=template_content,
         )
 
+        console.print("[bold green]Packing list generation completed successfully![/]")
         return result_content  # Return the generated content directly

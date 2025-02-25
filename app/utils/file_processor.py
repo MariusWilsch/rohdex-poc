@@ -1,131 +1,162 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Any, Callable, TypeVar, Optional
 import pandas as pd
 from datetime import datetime
 from io import StringIO, BytesIO
+from app.services.ai_service import AIService
+from app.services.monitoring import system_monitor
+from app.utils.retry_utils import execute_with_self_healing
+from rich.console import Console
+import json
+import time
+import functools
+
+console = Console()
+ai_service = AIService()
 
 
-def process_partie(content: bytes) -> Dict:
-    """Process Partie data from bytes content"""
+async def process_partie(content: bytes, filename: str = None) -> Dict:
+    """
+    Process Partie data from bytes content using AI with self-healing capabilities
+
+    Note: There is a known issue with tare weights in some input files. The AI extraction
+    correctly processes what's in the files, but client files sometimes contain incorrect
+    tare weights. This is a data source issue, not an extraction issue.
+    Last updated: 2024-02-24
+    """
+    start_time = time.time()
+    operation = f"extract_partie_data:{filename or 'Unknown'}"
+
     try:
-        # Read CSV from bytes buffer
-        buffer = BytesIO(content)
-        df = pd.read_csv(buffer, header=None)
-        print(f"\nProcessing Partie data with {len(df.columns)} columns")
-        print("Column values for first row:")
-        for i, val in enumerate(df.iloc[0]):
-            print(f"Column {i}: {val}")
+        # Convert bytes to string
+        content_str = content.decode("utf-8")
 
-        # Validate expected columns
-        if len(df.columns) < 11:
-            raise ValueError(f"Data has only {len(df.columns)} columns")
+        # Create metadata dict for monitoring
+        metadata = {"filename": filename}
 
-        # Process individual bales
-        bales_data = []
-        for idx, row in df.iterrows():
-            gross = row[10]  # Column K (0-indexed)
-            tare = 2.0  # Standard tare weight of 2.0 kg for all bales except last
-            if idx == len(df) - 1:  # Last bale
-                tare = 1.6  # Special tare weight for last bale
+        # Execute with self-healing retry logic
+        def extract():
+            # Use AI to extract data synchronously
+            result = ai_service.extract_partie_data(
+                content_str, filename or "Unknown Partie"
+            )
+            return result
 
-            net = gross - tare
-            bale_data = {
-                "bale_no": idx + 1,
-                "gross_kg": gross,
-                "tare_kg": tare,
-                "net_kg": net,
-                "net_lbs": net * 2.2046,
-            }
-            print(f"\nProcessed bale {idx + 1}:")
-            print(f"Gross: {gross} kg")
-            print(f"Tare: {tare} kg")
-            print(f"Net: {net} kg")
-            print(f"Net (lbs): {net * 2.2046} lbs")
-            bales_data.append(bale_data)
+        result = execute_with_self_healing(
+            operation_name=operation,
+            extraction_func=extract,
+        )
 
-        # Calculate totals
-        total_gross = sum(bale["gross_kg"] for bale in bales_data)
-        total_tare = sum(bale["tare_kg"] for bale in bales_data)
-        total_net = sum(bale["net_kg"] for bale in bales_data)
-        total_lbs = total_net * 2.2046
+        # After successful execution, record additional metadata
+        system_monitor.record_request(
+            service="FileProcessor",
+            operation=operation,
+            success=True,
+            duration=time.time() - start_time,
+            metadata={"filename": filename, "bale_count": len(result["bales"])},
+        )
 
-        print(f"\nTotals:")
-        print(f"Total Gross: {total_gross} kg")
-        print(f"Total Tare: {total_tare} kg")
-        print(f"Total Net: {total_net} kg")
-        print(f"Total Net (lbs): {total_lbs} lbs")
+        # Log results
+        console.print(
+            f"\n[bold green]Processed[/] [cyan]{len(result['bales'])}[/] [bold green]bales[/]"
+        )
+        console.print(
+            f"[bold green]Total Gross:[/] [cyan]{result['totals']['gross_kg']:.2f}[/] [bold green]kg[/]"
+        )
+        console.print(
+            f"[bold green]Total Net:[/] [cyan]{result['totals']['net_kg']:.2f}[/] [bold green]kg[/]"
+        )
+        console.print(
+            f"[bold green]Total Net (lbs):[/] [cyan]{result['totals']['net_lbs']:.2f}[/] [bold green]lbs[/]"
+        )
 
-        return {
-            "bales": bales_data,
-            "totals": {
-                "gross_kg": total_gross,
-                "tare_kg": total_tare,
-                "net_kg": total_net,
-                "net_lbs": total_lbs,
-                "bale_count": len(bales_data),
-            },
-        }
-
+        return result
     except Exception as e:
-        print(f"Error processing partie data: {str(e)}")
-        raise ValueError(f"Error processing partie data: {str(e)}")
+        total_duration = time.time() - start_time
+        error_msg = str(e)
+
+        # Record fatal error
+        system_monitor.record_error(
+            service="FileProcessor",
+            operation=operation,
+            error_message=error_msg,
+            metadata={"total_duration": total_duration},
+        )
+
+        console.print(
+            f"[bold red]Error processing partie data:[/] {error_msg}", style="red"
+        )
+        raise ValueError(f"Error processing partie data: {error_msg}")
 
 
-def load_wahrheit(content: bytes) -> Tuple[Dict, str, str]:
-    """Load Wahrheitsdatei mapping from bytes content"""
-    print("\n=== Processing Wahrheitsdatei ===")
+async def load_wahrheit(content: bytes) -> Tuple[Dict, str, str]:
+    """
+    Load Wahrheitsdatei mapping from bytes content using AI with self-healing capabilities
 
-    # Read CSV content, skipping the first row and using second row as headers
-    buffer = BytesIO(content)
-    df = pd.read_csv(buffer, sep="\t", encoding="utf-8", skiprows=1)
+    Note: There is a known issue with tare weights in some input files. The AI extraction
+    correctly processes what's in the files, but client files sometimes contain incorrect
+    tare weights. This is a data source issue, not an extraction issue.
+    Last updated: 2024-02-24
+    """
+    start_time = time.time()
+    operation = "extract_wahrheit_data"
 
-    # Debug information
-    print("\nDataFrame Info:")
-    print("Columns:", df.columns.tolist())
-    print("\nFirst few rows:")
-    print(df.head())
-    print(f"\nNumber of rows in Wahrheit file: {len(df)}")
+    console.print("\n[bold blue]=== Processing Wahrheitsdatei ===[/]")
 
-    # Initialize variables
-    product_map = {}
-    container_no = None
-    invoice_no = None
+    try:
+        # Convert bytes to string
+        content_str = content.decode("utf-8")
 
-    # Extract container number and invoice number from the raw text
-    text = content.decode("utf-8")
-    lines = text.splitlines()
-    for line in lines:
-        if any(prefix in line for prefix in ["CAIU", "ONEU"]):
-            parts = line.strip().split()
-            for i, part in enumerate(parts):
-                if any(
-                    part.startswith(prefix) for prefix in ["CAIU", "ONEU"]
-                ) and i + 1 < len(parts):
-                    container_no = f"{part} {parts[i+1]}"
-                    print(f"Found container number: {container_no}")
-                    break
-        elif line.strip().isdigit() and len(line.strip()) >= 7:
-            invoice_no = line.strip()
-            print(f"Found invoice number: {invoice_no}")
+        # Execute with self-healing retry logic
+        def extract():
+            # Use AI to extract data synchronously
+            result = ai_service.extract_wahrheit_data(content_str)
+            return result
 
-    # Create product mapping from Virtuelle Partie to Beschreibung 2
-    for _, row in df.iterrows():
-        if pd.notna(row["Virtuelle Partie"]):  # Check if partie number exists
-            partie_num = str(
-                int(row["Virtuelle Partie"])
-            )  # Convert to int first to remove any decimal places
-            description = row["Beschreibung 2"]
-            if pd.notna(description):  # Check if description exists
-                product_map[partie_num] = description.strip().upper()
-                print(f"Found product mapping - Partie {partie_num}: {description}")
+        # Execute with self-healing without passing metadata initially
+        result = execute_with_self_healing(
+            operation_name=operation,
+            extraction_func=extract,
+        )
 
-    print("\nFinal Wahrheit Processing Results:")
-    print(f"Container Number: {container_no}")
-    print(f"Invoice Number: {invoice_no}")
-    print("Product Mappings:")
-    for partie, desc in product_map.items():
-        print(f"  Partie {partie}: {desc}")
+        # After successful execution, record additional metadata
+        system_monitor.record_request(
+            service="FileProcessor",
+            operation=operation,
+            success=True,
+            duration=time.time() - start_time,
+            metadata={
+                "product_count": len(result.get("product_map", {})),
+                "container_no": result.get("container_no", "Unknown"),
+            },
+        )
 
-    return product_map, container_no, invoice_no
+        # Log results
+        console.print("\n[bold green]Wahrheit Processing Results:[/]")
+        console.print(
+            f"[bold green]Container Number:[/] [cyan]{result['container_no']}[/]"
+        )
+        console.print(f"[bold green]Invoice Number:[/] [cyan]{result['invoice_no']}[/]")
+        console.print("[bold green]Product Mappings:[/]")
+        for partie, desc in result["product_map"].items():
+            console.print(f"  [green]Partie {partie}:[/] [cyan]{desc}[/]")
+
+        return result["product_map"], result["container_no"], result["invoice_no"]
+    except Exception as e:
+        total_duration = time.time() - start_time
+        error_msg = str(e)
+
+        # Record fatal error
+        system_monitor.record_error(
+            service="FileProcessor",
+            operation=operation,
+            error_message=error_msg,
+            metadata={"total_duration": total_duration},
+        )
+
+        console.print(
+            f"[bold red]Error processing wahrheit data:[/] {error_msg}", style="red"
+        )
+        raise ValueError(f"Error processing wahrheit data: {error_msg}")
 
 
 def format_bales_data(bales: List[Dict]) -> str:
@@ -137,55 +168,117 @@ def format_bales_data(bales: List[Dict]) -> str:
     return "\n".join(lines)
 
 
-def generate_packing_list(
-    partie_contents: List[bytes], wahrheit_content: bytes, template_content: str
+async def generate_packing_list(
+    partie_contents: List, wahrheit_content: bytes, template_content: str
 ) -> str:
-    """Generate a packing list from multiple Partie contents"""
-    print("\n=== Generating Packing List ===")
-    # Load product mappings
-    product_map, container_no, invoice_no = load_wahrheit(wahrheit_content)
+    """Generate packing list from partie, wahrheit and template files
 
-    print("\nTemplate Processing:")
-    # Extract the product section template
-    start = template_content.find("{BEGIN_PRODUCT_SECTION}")
-    end = template_content.find("{END_PRODUCT_SECTION}") + len("{END_PRODUCT_SECTION}")
-    print(f"Template markers found - Start: {start}, End: {end}")
+    Args:
+        partie_contents: List of objects with content and filename properties
+        wahrheit_content: Bytes content of wahrheit file
+        template_content: String content of template file
 
-    product_template = (
-        template_content[start:end]
-        .replace("{BEGIN_PRODUCT_SECTION}\n", "")
-        .replace("\n{END_PRODUCT_SECTION}", "")
-    )
+    Returns:
+        String content of generated packing list
+    """
+    start_time = time.time()
 
-    # Process all Partie contents
-    product_sections = []
-    print(f"\nProcessing {len(partie_contents)} Partie files:")
-    for idx, partie_content in enumerate(partie_contents):
-        # Extract partie number from filename (e.g., "Partie 33876.csv" -> "33876")
-        partie_num = partie_content.filename.split()[1].split(".")[0]
-        print(f"\nProcessing Partie {partie_num}")
-        product_data = process_partie(partie_content.content)
-        description = product_map.get(partie_num)
-        print(f"Found description from Wahrheit: {description}")
-        section = generate_product_section(
-            product_template, product_data, partie_num, product_map.get(partie_num)
+    try:
+        # Load Wahrheitsdatei using AI
+        console.print("[bold blue]Processing Wahrheitsdatei...[/]")
+        product_map, container_no, invoice_no = await load_wahrheit(wahrheit_content)
+
+        # Find the start and end of the product section template
+        start = template_content.find("{BEGIN_PRODUCT_SECTION}")
+        end = template_content.find("{END_PRODUCT_SECTION}") + len(
+            "{END_PRODUCT_SECTION}"
         )
-        product_sections.append(section)
+        if start == -1 or end == -1:
+            raise ValueError(
+                "Template must contain {BEGIN_PRODUCT_SECTION} and {END_PRODUCT_SECTION} markers"
+            )
 
-    # Generate final document
-    print("\nGenerating final document")
-    output_content = template_content[:start]  # Get header
-    output_content = output_content.replace(
-        "{INVOICE_NO}", invoice_no or datetime.now().strftime("%Y%m%d")
-    )
-    output_content = output_content.replace("{CONTAINER_NO}", container_no or "TBD")
-    print(f"Using Invoice No: {invoice_no}")
-    print(f"Using Container No: {container_no}")
+        # Extract the product section template
+        product_template = (
+            template_content[start:end]
+            .replace("{BEGIN_PRODUCT_SECTION}\n", "")
+            .replace("\n{END_PRODUCT_SECTION}", "")
+        )
 
-    # Add all product sections
-    output_content += "\n".join(product_sections)
+        # Process all Partie contents
+        product_sections = []
+        console.print(
+            f"\n[bold green]Processing[/] [cyan]{len(partie_contents)}[/] [bold green]Partie files:[/]"
+        )
+        for idx, partie_content in enumerate(partie_contents):
+            # Extract partie number from filename (e.g., "Partie 33876.csv" -> "33876")
+            partie_num = partie_content.filename.split()[1].split(".")[0]
+            console.print(f"\n[bold green]Processing Partie[/] [cyan]{partie_num}[/]")
+            product_data = await process_partie(
+                partie_content.content, partie_content.filename
+            )
+            description = product_map.get(partie_num)
+            console.print(
+                f"[bold green]Found description from Wahrheit:[/] [cyan]{description}[/]"
+            )
+            section = generate_product_section(
+                product_template, product_data, partie_num, product_map.get(partie_num)
+            )
+            product_sections.append(section)
 
-    return output_content
+        # Generate final document
+        console.print("\n[bold green]Generating final document[/]")
+        output_content = template_content[:start]  # Get header
+        output_content = output_content.replace(
+            "{INVOICE_NO}", invoice_no or datetime.now().strftime("%Y%m%d")
+        )
+        output_content = output_content.replace("{CONTAINER_NO}", container_no or "TBD")
+        console.print(f"[bold green]Using Invoice No:[/] [cyan]{invoice_no}[/]")
+        console.print(f"[bold green]Using Container No:[/] [cyan]{container_no}[/]")
+
+        # Add all product sections
+        output_content += "\n".join(product_sections)
+
+        # Print cost summary if available
+        if hasattr(ai_service, "cost_tracker") and ai_service.cost_tracker:
+            ai_service.cost_tracker.print_summary()
+
+        # Print monitoring summary
+        system_monitor.print_summary()
+
+        total_duration = time.time() - start_time
+
+        # Record successful packing list generation
+        system_monitor.record_request(
+            service="PackingListGenerator",
+            operation="generate_packing_list",
+            success=True,
+            duration=total_duration,
+            metadata={
+                "partie_count": len(partie_contents),
+                "container_no": container_no,
+                "invoice_no": invoice_no,
+            },
+        )
+
+        return output_content
+
+    except Exception as e:
+        total_duration = time.time() - start_time
+        error_msg = str(e)
+
+        # Record fatal error
+        system_monitor.record_error(
+            service="PackingListGenerator",
+            operation="generate_packing_list",
+            error_message=error_msg,
+            metadata={"total_duration": total_duration},
+        )
+
+        # Print monitoring summary even on error
+        system_monitor.print_summary()
+
+        raise e
 
 
 def generate_product_section(

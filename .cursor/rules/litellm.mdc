@@ -4,129 +4,709 @@ globs:
 alwaysApply: false
 ---
 <xml_output>
-<?xml version="1.0" encoding="UTF-8"?>
 <litellm_guide>
-    <introduction>
-        <description>LiteLLM is a unified interface for calling 100+ LLM APIs using the OpenAI input/output format. It provides consistent response handling, manages API keys, tracks usage costs, and supports advanced features like routing, caching, and fallbacks.</description>
-    </introduction>
+  <overview>
+    <title># LiteLLM</title>
+    
+    > LiteLLM is a unified interface for calling 100+ LLM APIs using the OpenAI input/output format. It provides consistent response handling, manages API keys, tracks usage costs, and supports advanced features like routing, caching, and fallbacks.
+  </overview>
+  
+  <usage_instructions>
+    <section_title>## How to Use This Guide</section_title>
+    
+    This guide follows the LLM.txt format, combining direct implementation instructions with links to detailed documentation:
 
-    <usage_guide>
-        <guide_instructions>
-            <instruction>For sections with direct code snippets, use them immediately in your projects</instruction>
-            <instruction>For link-based sections, use the "scrape" tool to fetch the latest documentation</instruction>
-            <instruction>If scrape tool isn't available, note links that need to be accessed</instruction>
-            <instruction>Judge which links to scrape based on integration needs</instruction>
-            <note>All information has a "Last Updated" timestamp</note>
-        </guide_instructions>
-    </usage_guide>
+    1. For sections with direct code snippets, you can use them immediately in your projects
+    2. For link-based sections, use the "scrape" tool to fetch the latest documentation:
+       ```
+       scrape [URL]
+       ```
+    3. If the scrape tool isn't available, do not visit the links manually. Instead, note the links that need to be accessed and why they're relevant for your implementation
+    4. Judge which links to scrape based on your integration needs (e.g., if implementing token usage tracking, scrape that specific link)
+    5. All information has a "Last Updated" timestamp - if working with older content, consider re-scraping links
+  </usage_instructions>
+  
+  <setup>
+    <section_title>## Core Setup and API Keys</section_title>
+    *Last Updated: February 24, 2025*
 
-    <setup>
-        <installation>
-            <command>pip install litellm</command>
-            <configuration_method>
-                <description>Configure API keys using Pydantic BaseSettings</description>
-                <code_example>
-                    <![CDATA[
-from pydantic import BaseSettings, SecretStr
-from functools import lru_cache
+    First, install LiteLLM:
 
-class LiteLLMSettings(BaseSettings):
-    OPENAI_API_KEY: SecretStr
-    ANTHROPIC_API_KEY: SecretStr
-    DEEPSEEK_API_KEY: SecretStr
-    # Additional configuration options
-                    ]]>
-                </code_example>
-            </configuration_method>
-        </installation>
-    </setup>
+    ```python
+    pip install litellm          # For Python SDK only
+    ```
 
-    <completion_calls>
-        <basic_usage>
-            <description>Core function is `completion()` following OpenAI chat completions format</description>
-            <providers>
-                <provider name="OpenAI">
-                    <model>gpt-4o</model>
-                    <model>gpt-3.5-turbo</model>
-                </provider>
-                <provider name="Anthropic">
-                    <model>claude-3-sonnet-20240229</model>
-                </provider>
-                <provider name="DeepSeek">
-                    <model>deepseek-chat</model>
-                </provider>
-            </providers>
-        </basic_usage>
-    </completion_calls>
+    Configure API keys using Pydantic BaseSettings (recommended Python pattern that works well with LiteLLM):
 
-    <advanced_features>
-        <vision_support last_updated="February 24, 2025">
-            <description>Support for vision models with base64 image encoding</description>
-            <supported_providers>
-                <provider>OpenAI</provider>
-                <provider>Anthropic</provider>
-            </supported_providers>
-        </vision_support>
+    ```python
+    from pydantic import BaseSettings, SecretStr
+    from functools import lru_cache
 
-        <json_mode last_updated="February 24, 2025">
-            <description>Request structured JSON outputs from models</description>
-            <methods>
-                <method>response_format parameter</method>
-                <method>Pydantic model schema validation</method>
-            </methods>
-        </json_mode>
+    # NOTE: This is a general Python pattern using Pydantic BaseSettings
+    # It's not specific to LiteLLM but works well for managing LiteLLM configuration
+    class LiteLLMSettings(BaseSettings):
+        # OpenAI Configuration
+        OPENAI_API_KEY: SecretStr
+        OPENAI_ORGANIZATION: str = None
+        OPENAI_API_BASE: str = None
+        
+        # Anthropic Configuration
+        ANTHROPIC_API_KEY: SecretStr
+        
+        # DeepSeek Configuration
+        DEEPSEEK_API_KEY: SecretStr
+        
+        # API Configuration
+        DEBUG: bool = False
+        
+        class Config:
+            env_file = ".env"
+            env_file_encoding = "utf-8"
+            case_sensitive = True
 
-        <prompt_caching last_updated="February 24, 2025">
-            <description>Prompt caching to reduce latency and costs</description>
-            <supported_providers>
-                <provider>Anthropic</provider>
-            </supported_providers>
-        </prompt_caching>
-    </advanced_features>
+    @lru_cache()
+    def get_llm_settings() -> LiteLLMSettings:
+        return LiteLLMSettings()
 
-    <models>
-        <provider name="OpenAI">
-            <model_list>
-                <model>gpt-4o</model>
-                <model>gpt-4-turbo</model>
-                <model>gpt-3.5-turbo</model>
-            </model_list>
-        </provider>
-        <provider name="Anthropic">
-            <model_list>
-                <model>claude-3.5-sonnet-20240620</model>
-                <model>claude-3-opus-20240229</model>
-            </model_list>
-        </provider>
-        <provider name="DeepSeek">
-            <model_list>
-                <model>deepseek-chat</model>
-                <model>deepseek-coder</model>
-            </model_list>
-        </provider>
-    </models>
+    # Usage in your application
+    import os
+    from litellm import completion
+
+    settings = get_llm_settings()
+
+    # Set environment variables from settings
+    os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY.get_secret_value()
+    if settings.OPENAI_ORGANIZATION:
+        os.environ["OPENAI_ORGANIZATION"] = settings.OPENAI_ORGANIZATION
+    if settings.OPENAI_API_BASE:
+        os.environ["OPENAI_API_BASE"] = settings.OPENAI_API_BASE
+
+    os.environ["ANTHROPIC_API_KEY"] = settings.ANTHROPIC_API_KEY.get_secret_value()
+    os.environ["DEEPSEEK_API_KEY"] = settings.DEEPSEEK_API_KEY.get_secret_value()
+    ```
+
+    [Complete API Key Documentation](mdc:https:/docs.litellm.ai/docs/set_keys)
+  </setup>
+  
+  <basic_usage>
+    <section_title>## Basic Completion Calls</section_title>
+    *Last Updated: February 24, 2025*
+
+    The core function is `completion()` which follows the OpenAI chat completions format:
+
+    ```python
+    from litellm import completion
+
+    # OpenAI
+    response = completion(
+        model="gpt-4o",  # or other models like "gpt-3.5-turbo"
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": "Hello, how are you?"}
+        ],
+        temperature=0.7,  # Optional parameters
+        max_tokens=100
+    )
+
+    # Anthropic
+    response = completion(
+        model="anthropic/claude-3-sonnet-20240229",  # Use provider prefix or just model name
+        messages=[{"role": "user", "content": "Hello, how are you?"}]
+    )
+
+    # DeepSeek
+    response = completion(
+        model="deepseek/deepseek-chat",  # Use deepseek/ prefix for DeepSeek models
+        messages=[{"role": "user", "content": "Hello from litellm"}]
+    )
+
+    # Access response in OpenAI format
+    print(response.choices[0].message.content)
+    ```
+
+    <wrappers>
+      <subsection_title>### Essential Wrappers: `ask` and Cost Tracking</subsection_title>
+      *Last Updated: February 24, 2025*
+
+      <cost_tracking>
+        <subsubsection_title>#### Cost Tracker Implementation</subsubsection_title>
+
+        This cost tracking utility should **always** be implemented in your projects. It tracks LLM usage costs, providing both per-request and cumulative cost monitoring:
+
+        ```python
+        from litellm import completion, completion_cost
+        from openai.error import OpenAIError
+        from typing import Dict, List, Optional, Union, Any
+        from datetime import datetime
+        import json
+        import os
+
+        class CostTracker:
+            def __init__(self, log_to_file: bool = True, log_file: str = "llm_costs.json"):
+                self.total_cost = 0.0
+                self.model_costs: Dict[str, float] = {}
+                self.request_history: List[Dict[str, Any]] = []
+                self.log_to_file = log_to_file
+                self.log_file = log_file
+                
+                # Load existing data if file exists
+                if self.log_to_file and os.path.exists(self.log_file):
+                    try:
+                        with open(self.log_file, 'r') as f:
+                            data = json.load(f)
+                            self.total_cost = data.get('total_cost', 0.0)
+                            self.model_costs = data.get('model_costs', {})
+                            self.request_history = data.get('request_history', [])
+                    except (json.JSONDecodeError, IOError):
+                        # Reset if file is corrupted
+                        self.total_cost = 0.0
+                        self.model_costs = {}
+                        self.request_history = []
+            
+            def _save_to_file(self):
+                """Save cost data to JSON file"""
+                if not self.log_to_file:
+                    return
+                    
+                data = {
+                    'total_cost': self.total_cost,
+                    'model_costs': self.model_costs,
+                    'request_history': self.request_history,
+                    'last_updated': datetime.now().isoformat()
+                }
+                
+                with open(self.log_file, 'w') as f:
+                    json.dump(data, f, indent=2)
+            
+            def track_request_cost(self, model: str, response: Any) -> float:
+                """
+                Track cost for a single non-streaming completion request
+                
+                Args:
+                    model: The model used
+                    response: The response from litellm.completion
+                    
+                Returns:
+                    The cost of this request in USD
+                """
+                try:
+                    # Calculate cost using LiteLLM's built-in function
+                    cost = completion_cost(completion_response=response)
+                    
+                    # Update tracking
+                    self.total_cost += cost
+                    self.model_costs[model] = self.model_costs.get(model, 0) + cost
+                    
+                    # Record request details
+                    request_data = {
+                        'timestamp': datetime.now().isoformat(),
+                        'model': model,
+                        'cost': cost,
+                        'prompt_tokens': response.usage.prompt_tokens,
+                        'completion_tokens': response.usage.completion_tokens,
+                        'total_tokens': response.usage.total_tokens
+                    }
+                    self.request_history.append(request_data)
+                    
+                    # Save updated data
+                    self._save_to_file()
+                    
+                    return cost
+                
+                except Exception as e:
+                    print(f"Error tracking cost: {e}")
+                    return 0.0
+            
+            def get_model_cost(self, model: str) -> float:
+                """Get total cost for a specific model"""
+                return self.model_costs.get(model, 0.0)
+            
+            def get_total_cost(self) -> float:
+                """Get total cost across all models"""
+                return self.total_cost
+            
+            def get_cost_summary(self) -> Dict[str, Any]:
+                """Get a summary of all costs"""
+                return {
+                    'total_cost': self.total_cost,
+                    'model_costs': self.model_costs,
+                    'request_count': len(self.request_history),
+                    'last_request': self.request_history[-1] if self.request_history else None
+                }
+            
+            def print_summary(self):
+                """Print a summary of costs to console"""
+                summary = self.get_cost_summary()
+                print(f"\n===== LLM Cost Summary =====")
+                print(f"Total Cost: ${summary['total_cost']:.6f} USD")
+                print(f"Total Requests: {summary['request_count']}")
+                
+                print("\nCost by Model:")
+                for model, cost in summary['model_costs'].items():
+                    print(f"  {model}: ${cost:.6f} USD")
+                
+                if summary['last_request']:
+                    print(f"\nLast Request: {summary['last_request']['model']} - ${summary['last_request']['cost']:.6f} USD - {summary['last_request']['total_tokens']} tokens")
+                print("=============================\n")
+                
+        # Create a global cost tracker instance
+        cost_tracker = CostTracker()
+        ```
+      </cost_tracking>
+
+      <ask_wrapper>
+        <subsubsection_title>#### `ask` Wrapper with Cost Tracking</subsubsection_title>
+
+        Always use this wrapper for LLM calls in your projects:
+
+        ```python
+        from litellm import completion
+        from openai.error import OpenAIError
+        from typing import List, Dict, Any, Optional, Union
+
+        def ask(
+            model: str,
+            messages: List[Dict[str, str]],
+            temperature: float = 0.7,
+            max_tokens: Optional[int] = None,
+            track_cost: bool = True,
+            **kwargs
+        ) -> Union[Dict[str, Any], None]:
+            """
+            Enhanced wrapper around litellm.completion that returns the response text
+            and tracks costs.
+            
+            Args:
+                model: The model to use (e.g., "gpt-4o", "anthropic/claude-3-sonnet")
+                messages: List of message dictionaries with "role" and "content" keys
+                temperature: Control randomness (0-1)
+                max_tokens: Maximum tokens to generate
+                track_cost: Whether to track cost (default True)
+                **kwargs: Any additional parameters to pass to completion
+                
+            Returns:
+                Dictionary with 'content' (response text), 'cost', and 'full_response',
+                or None if there was an error
+            """
+            try:
+                response = completion(
+                    model=model,
+                    messages=messages,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    **kwargs
+                )
+                
+                content = response.choices[0].message.content
+                
+                # Always track costs unless explicitly disabled
+                cost = 0.0
+                if track_cost:
+                    cost = cost_tracker.track_request_cost(model, response)
+                
+                return {
+                    'content': content,
+                    'cost': cost,
+                    'full_response': response,
+                }
+            except OpenAIError as e:
+                print(f"Error calling LLM: {e}")
+                return None
+            except Exception as e:
+                print(f"Unexpected error: {e}")
+                return None
+
+        # Example usage
+        system_message = {"role": "system", "content": "You are a helpful assistant."}
+        user_message = {"role": "user", "content": "What is the capital of France?"}
+
+        result = ask(
+            model="gpt-4o",
+            messages=[system_message, user_message]
+        )
+
+        if result:
+            print(f"Response: {result['content']}")
+            print(f"Cost: ${result['cost']:.6f} USD")
+            
+            # Periodically print cost summary
+            cost_tracker.print_summary()
+        ```
+
+        For streaming responses, set `stream=True`:
+
+        ```python
+        response = completion(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": "Write a short story"}],
+            stream=True
+        )
+
+        for chunk in response:
+            print(chunk.choices[0].delta.content, end="")
+        ```
+
+        [Complete Completion API Documentation](mdc:https:/docs.litellm.ai/docs/#litellm-python-sdk)
+      </ask_wrapper>
+    </wrappers>
+  </basic_usage>
+  
+  <advanced_features>
+    <vision_support>
+      <section_title>## Vision and Multimodal Support</section_title>
+      *Last Updated: February 24, 2025*
+
+      For vision models, prepare images with base64 encoding:
+
+      ```python
+      def encode_image(image_path):
+          import base64
+          with open(image_path, "rb") as image_file:
+              return base64.b64encode(image_file.read()).decode("utf-8")
+
+      base64_image = encode_image("path/to/image.jpg")
+
+      # OpenAI Vision
+      response = completion(
+          model="gpt-4o",  # or "gpt-4-vision-preview"
+          messages=[
+              {
+                  "role": "user",
+                  "content": [
+                      {"type": "text", "text": "What's in this image?"},
+                      {
+                          "type": "image_url",
+                          "image_url": {
+                              "url": f"data:image/jpeg;base64,{base64_image}"
+                          }
+                      }
+                  ]
+              }
+          ]
+      )
+
+      # Anthropic Vision
+      response = completion(
+          model="anthropic/claude-3-opus-20240229",
+          messages=[
+              {
+                  "role": "user",
+                  "content": [
+                      {"type": "text", "text": "What's in this image?"},
+                      {
+                          "type": "image_url",
+                          "image_url": {
+                              "url": f"data:image/jpeg;base64,{base64_image}"
+                          }
+                      }
+                  ]
+              }
+          ]
+      )
+      ```
+
+      [OpenAI Vision Documentation](mdc:https:/docs.litellm.ai/docs/providers/openai#openai-vision-models)
+      [Anthropic Vision Documentation](mdc:https:/docs.litellm.ai/docs/providers/anthropic#usage---vision)
+    </vision_support>
+
+    <json_mode>
+      <section_title>## Structured Outputs (JSON Mode)</section_title>
+      *Last Updated: February 24, 2025*
+
+      You can request structured JSON outputs from models:
+
+      ```python
+      from litellm import completion
+      import os
+      from pydantic import BaseModel
+      from typing import List, Optional
+
+      # Option 1: Using response_format parameter
+      response = completion(
+          model="gpt-4o",
+          response_format={"type": "json_object"},
+          messages=[
+              {"role": "system", "content": "You are a helpful assistant designed to output JSON."},
+              {"role": "user", "content": "List three capital cities and their countries"}
+          ]
+      )
+
+      print(response.choices[0].message.content)
+      # Output: {"cities":[{"name":"Paris","country":"France"},{"name":"Tokyo","country":"Japan"},{"name":"Canberra","country":"Australia"}]}
+
+
+      # Option 2: Using Pydantic model for schema validation
+      class City(BaseModel):
+          name: str
+          country: str
+          population: Optional[int]
+
+      class CitiesList(BaseModel):
+          cities: List[City]
+
+      response = completion(
+          model="gpt-4o",
+          response_format=CitiesList,
+          messages=[
+              {"role": "system", "content": "Extract structured city information."},
+              {"role": "user", "content": "Paris is the capital of France, Tokyo is the capital of Japan, and Canberra is the capital of Australia."}
+          ]
+      )
+
+      # Parsed response is available
+      cities_data = response.choices[0].message.parsed
+      print(f"First city: {cities_data.cities[0].name}, {cities_data.cities[0].country}")
+      ```
+
+      To check if a model supports JSON mode:
+
+      ```python
+      from litellm import get_supported_openai_params, supports_response_schema
+
+      # Check if a model supports response_format
+      params = get_supported_openai_params(model="anthropic.claude-3", custom_llm_provider="bedrock")
+      supports_json = "response_format" in params
+      print(f"Model supports basic JSON mode: {supports_json}")
+
+      # Check if a model supports json_schema (for more complex schemas)
+      supports_schema = supports_response_schema(model="gemini-1.5-pro-preview-0215", custom_llm_provider="bedrock")
+      print(f"Model supports JSON schema: {supports_schema}")
+      ```
+
+      [Complete JSON Mode Documentation](mdc:https:/docs.litellm.ai/docs/completion/json_mode)
+    </json_mode>
+
+    <caching>
+      <section_title>## Prompt Caching</section_title>
+      *Last Updated: February 24, 2025*
+
+      Anthropic models support prompt caching to reduce latency and costs:
+
+      ```python
+      from litellm import completion
+
+      # Basic caching of a system prompt
+      response = completion(
+          model="anthropic/claude-3-5-sonnet-20240620",
+          messages=[
+              {
+                  "role": "system",
+                  "content": [
+                      {
+                          "type": "text",
+                          "text": "You are an AI assistant tasked with analyzing legal documents.",
+                      },
+                      {
+                          "type": "text",
+                          "text": "Here is the full text of a complex legal agreement that's 20 pages long...",
+                          "cache_control": {"type": "ephemeral"},  # This part will be cached
+                      },
+                  ],
+              },
+              {
+                  "role": "user",
+                  "content": "What are the key terms and conditions in this agreement?",
+              },
+          ]
+      )
+
+      # Caching tool definitions
+      response = completion(
+          model="anthropic/claude-3-5-sonnet-20240620",
+          messages=[{"role": "user", "content": "What's the weather like in Boston today?"}],
+          tools=[
+              {
+                  "type": "function",
+                  "function": {
+                      "name": "get_current_weather",
+                      "description": "Get the current weather in a given location",
+                      "parameters": {
+                          "type": "object",
+                          "properties": {
+                              "location": {
+                                  "type": "string",
+                                  "description": "The city and state, e.g. San Francisco, CA",
+                              },
+                              "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]},
+                          },
+                          "required": ["location"],
+                      },
+                      "cache_control": {"type": "ephemeral"}  # Cache the tool definition
+                  },
+              }
+          ]
+      )
+
+      # Multi-turn conversation caching
+      response = completion(
+          model="anthropic/claude-3-5-sonnet-20240620",
+          messages=[
+              # System Message
+              {
+                  "role": "system",
+                  "content": [
+                      {
+                          "type": "text",
+                          "text": "Here is the full text of a complex legal agreement...",
+                          "cache_control": {"type": "ephemeral"},
+                      }
+                  ],
+              },
+              # Previous turn cached
+              {
+                  "role": "user",
+                  "content": [
+                      {
+                          "type": "text",
+                          "text": "What are the key terms and conditions in this agreement?",
+                          "cache_control": {"type": "ephemeral"},
+                      }
+                  ],
+              },
+              {
+                  "role": "assistant",
+                  "content": "The key terms include a 1-year contract duration at $10/month...",
+              },
+              # Current turn
+              {
+                  "role": "user",
+                  "content": "Can you summarize just the payment terms?",
+              },
+          ]
+      )
+      ```
+
+      [Complete Prompt Caching Documentation](mdc:https:/docs.litellm.ai/docs/providers/anthropic#prompt-caching)
+    </caching>
+  </advanced_features>
+  
+  <reference>
+    <exception_handling>
+      <section_title>## Exception Handling</section_title>
+      *Last Updated: February 24, 2025*
+
+      LiteLLM maps all provider exceptions to OpenAI exception types:
+
+      ```python
+      from openai.error import OpenAIError
+      from litellm import completion
+
+      try:
+          completion(
+              model="claude-3-sonnet-20240229", 
+              messages=[{"role": "user", "content": "Hello"}],
+              api_key="invalid-key"
+          )
+      except OpenAIError as e:
+          print(f"Error: {e}")
+      ```
+    </exception_handling>
+
+    <supported_models>
+      <section_title>## Supported Models by Provider</section_title>
+      *Last Updated: February 24, 2025*
+
+      <openai_models>
+        <subsection_title>### OpenAI Models</subsection_title>
+        - `o1-mini` - OpenAI's smallest O1 model
+        - `o1-preview` - OpenAI's preview O1 model
+        - `gpt-4o-mini` - Smaller version of GPT-4o
+        - `gpt-4o-mini-2024-07-18` - Specific version of GPT-4o-mini
+        - `gpt-4o` - OpenAI's multimodal GPT-4o model
+        - `gpt-4o-2024-08-06` - Specific version of GPT-4o
+        - `gpt-4o-2024-05-13` - Specific version of GPT-4o
+        - `gpt-4-turbo` - GPT-4 Turbo
+        - `gpt-4-turbo-preview` - Preview version of GPT-4 Turbo
+        - `gpt-4-0125-preview` - Specific version of GPT-4
+        - `gpt-4-1106-preview` - Specific version of GPT-4
+        - `gpt-3.5-turbo-1106` - GPT-3.5 Turbo version
+        - `gpt-3.5-turbo` - Standard GPT-3.5 Turbo
+        - `gpt-3.5-turbo-0301` - Specific version of GPT-3.5 Turbo
+        - `gpt-3.5-turbo-0613` - Specific version of GPT-3.5 Turbo
+        - `gpt-3.5-turbo-16k` - GPT-3.5 Turbo with 16k context window
+        - `gpt-3.5-turbo-16k-0613` - Specific version of GPT-3.5 Turbo with 16k context
+        - `gpt-4` - Standard GPT-4
+        - `gpt-4-0314` - Specific version of GPT-4
+        - `gpt-4-0613` - Specific version of GPT-4
+        - `gpt-4-32k` - GPT-4 with 32k context window
+        - `gpt-4-32k-0314` - Specific version of GPT-4 with 32k context
+        - `gpt-4-32k-0613` - Specific version of GPT-4 with 32k context
+        - `gpt-4-vision-preview` - GPT-4 with vision capabilities
+      </openai_models>
+
+      <anthropic_models>
+        <subsection_title>### Anthropic Models</subsection_title>
+        - `claude-3.5-sonnet-20240620` - Claude 3.5 Sonnet
+        - `claude-3-haiku-20240307` - Claude 3 Haiku
+        - `claude-3-opus-20240229` - Claude 3 Opus
+        - `claude-3-sonnet-20240229` - Claude 3 Sonnet
+        - `claude-2.1` - Claude 2.1
+        - `claude-2` - Claude 2
+        - `claude-instant-1.2` - Claude Instant 1.2
+        - `claude-instant-1` - Claude Instant 1
+      </anthropic_models>
+
+      <deepseek_models>
+        <subsection_title>### DeepSeek Models</subsection_title>
+        - `deepseek-chat` - DeepSeek's main chat model
+        - `deepseek-coder` - DeepSeek's code-specialized model
+        - `deepseek-reasoner` - DeepSeek's reasoning-specialized model
+      </deepseek_models>
+
+      [Complete Model List Reference](mdc:https:/github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json)
+    </supported_models>
 
     <integrations>
-        <providers>
-            <provider>OpenAI</provider>
-            <provider>Anthropic</provider>
-            <provider>DeepSeek</provider>
-        </providers>
+      <section_title>## Provider Integration</section_title>
+
+      - [OpenAI Integration](mdc:https:/docs.litellm.ai/docs/providers/openai): Working with OpenAI and Azure OpenAI models
+      - [Anthropic Integration](mdc:https:/docs.litellm.ai/docs/providers/anthropic): Using Claude models with LiteLLM
+      - [DeepSeek Integration](mdc:https:/docs.litellm.ai/docs/providers/deepseek): Accessing DeepSeek models
     </integrations>
 
-    <maintenance>
-        <update_guidelines>
-            <step>Re-scrape links when documentation changes</step>
-            <step>Update "Last Updated" timestamps</step>
-            <step>Update code snippets for major version changes</step>
-            <step>Add new provider setups as they become common</step>
-        </update_guidelines>
-    </maintenance>
+    <function_calling>
+      <section_title>## Function/Tool Calling</section_title>
+      *Last Updated: February 24, 2025*
+
+      Function calling allows models to use tools you define. For implementation details, use:
+
+      - [Function Calling Documentation](mdc:https:/docs.litellm.ai/docs/completion/function_call)
+      - [Anthropic Tool Calling](mdc:https:/docs.litellm.ai/docs/providers/anthropic#functiontool-calling)
+      - [OpenAI Function Calling](mdc:https:/docs.litellm.ai/docs/providers/openai#parallel-function-calling)
+    </function_calling>
+
+    <additional_features>
+      <section_title>## Advanced Features</section_title>
+
+      - [Token Usage & Cost Tracking](mdc:https:/docs.litellm.ai/docs/completion/token_usage): Monitoring token usage and calculating costs
+    </additional_features>
+  </reference>
+  
+  <maintenance>
+    <update_guide>
+      <section_title>## How to Update This Guide</section_title>
+
+      To keep this guide current:
+
+      1. Re-scrape links when documentation may have changed:
+         ```
+         scrape https://docs.litellm.ai/docs/set_keys
+         ```
+
+      2. Update the "Last Updated" timestamps when adding new information
+
+      3. For major LiteLLM version changes, update core code snippets by testing them with the new version
+
+      4. If additional providers become commonly used, add their setup and completion examples to the "Core Setup" and "Basic Completion Calls" sections
+    </update_guide>
 
     <optional_features>
-        <feature>Router Implementation</feature>
-        <feature>Logging & Observability</feature>
-        <feature>Embedding API Usage</feature>
+      <section_title>## Optional</section_title>
+
+      - [Router Implementation](mdc:https:/docs.litellm.ai/docs/routing): Load balancing across multiple providers
+      - [Logging & Observability](mdc:https:/docs.litellm.ai/docs/observability/callbacks): Setting up logging callbacks
+      - [Embedding API Usage](mdc:https:/docs.litellm.ai/docs/embedding/supported_embedding): Working with embedding models
     </optional_features>
+  </maintenance>
 </litellm_guide>
 </xml_output>

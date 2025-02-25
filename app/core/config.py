@@ -1,6 +1,7 @@
 from pydantic_settings import BaseSettings
 from pydantic import SecretStr
 from functools import lru_cache
+from typing import Optional
 
 
 class Settings(BaseSettings):
@@ -12,6 +13,14 @@ class Settings(BaseSettings):
     IMAP_SERVER: str = "imap.gmail.com"
     SMTP_SERVER: str = "smtp.gmail.com"
     SMTP_PORT: int = 465
+
+    # AI Configuration
+    ANTHROPIC_API_KEY: SecretStr = None
+    LITELLM_MODEL: str = (
+        "anthropic/claude-3-5-sonnet-20240620"  # Latest Claude 3.5 Sonnet model
+    )
+    LITELLM_BASE_URL: Optional[str] = None  # Optional proxy URL
+    LITELLM_COST_TRACKING: bool = True  # Enable cost tracking
 
     class Config:
         env_file = ".env"
