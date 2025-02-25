@@ -1,379 +1,174 @@
-from litellm import completion
+from litellm import completion, completion_cost, OpenAIError
 from app.core.config import get_settings
-from typing import Dict, Any, List, Optional
-from rich.console import Console
-import json
-import time
+from app.core.logger import LoggerSingleton
+from app.services.cost_tracker import CostTracker
+from typing import Dict, Any, List, Optional, Type, TypeVar
+from pydantic import BaseModel
+import json, time, litellm
 
-console = Console()
+
+# Get both logger and console from the singleton
+logger = LoggerSingleton.get_logger()
+console = LoggerSingleton.get_console()
+
+# Type variable for Pydantic model
+T = TypeVar("T", bound=BaseModel)
 
 
 class AIService:
     def __init__(self):
         self.settings = get_settings()
-        self.api_key = (
-            self.settings.ANTHROPIC_API_KEY.get_secret_value()
-            if self.settings.ANTHROPIC_API_KEY
-            else None
-        )
+        # API keys are now set as environment variables in config.py
+
         self.model = self.settings.LITELLM_MODEL
         self.base_url = self.settings.LITELLM_BASE_URL
         self.cost_tracking_enabled = self.settings.LITELLM_COST_TRACKING
         self.cost_tracker = CostTracker() if self.cost_tracking_enabled else None
 
+        # Log initialization with both console (for visibility) and logger (for records)
         console.print(
             f"[bold green]AI Service initialized with model:[/] [cyan]{self.model}[/]"
         )
-        if not self.api_key:
+        logger.info(f"AI Service initialized with model: {self.model}")
+
+        # Check for missing API keys
+        if not self.settings.ANTHROPIC_API_KEY and not self.settings.OPENAI_API_KEY:
             console.print(
-                "[bold red]Warning:[/] No API key provided. Please set ANTHROPIC_API_KEY in .env file.",
+                "[bold red]Warning:[/] No API keys provided. Please set ANTHROPIC_API_KEY or OPENAI_API_KEY in .env file.",
                 style="red",
             )
+            logger.warning(
+                "No API keys provided. Please set ANTHROPIC_API_KEY or OPENAI_API_KEY in .env file."
+            )
 
-    def extract_partie_data(self, content: str, partie_filename: str) -> Dict[str, Any]:
-        """Extract data from Partie file using AI"""
+    def extract_structured_data(
+        self,
+        content: str,
+        system_prompt: str,
+        user_prompt: str,
+        response_model: Type[T],
+        model: str = "gpt-4o-mini",
+        temperature: float = 0.1,
+        description: str = "data",
+    ) -> T:
+        """
+        Extract structured data using a Pydantic model for validation.
+        This is the preferred method for extracting structured data.
+
+        Args:
+            content: The content to extract data from
+            system_prompt: The system prompt to use
+            user_prompt: The user prompt template (will be formatted with content)
+            response_model: A Pydantic model class that defines the expected response structure
+            model: The model to use (defaults to gpt-4o-mini)
+            temperature: The temperature to use (defaults to 0.1)
+            description: Description of what's being extracted (for logging)
+
+        Returns:
+            An instance of the provided Pydantic model
+        """
         start_time = time.time()
 
-        system_prompt = """
-        You are a data extraction assistant. Extract weight measurements from the provided CSV data.
-        The data represents weight measurements from industrial scales.
-        """
+        formatted_user_prompt = user_prompt.format(content=content)
 
-        user_prompt = f"""
-        Extract the following information from this CSV data from file {partie_filename}:
-        
-        {content}
-        
-        For each row (representing a bale), extract:
-        1. The gross weight (column K, index 10)
-        2. Calculate net weight (gross - tare)
-        3. Calculate net weight in lbs (net * 2.2046)
-        
-        Use a tare weight of 2.0 kg for all bales except the last one, which should use 1.6 kg.
-        
-        Return the data in JSON format with this structure:
-        {{
-            "bales": [
-                {{
-                    "bale_no": 1,
-                    "gross_kg": 123.45,
-                    "tare_kg": 2.0,
-                    "net_kg": 121.45,
-                    "net_lbs": 267.75
-                }},
-                // more bales...
-            ],
-            "totals": {{
-                "gross_kg": 1234.56,
-                "tare_kg": 20.0,
-                "net_kg": 1214.56,
-                "net_lbs": 2677.61,
-                "bale_count": 10
-            }}
-        }}
-        """
-
+        # User-facing information - use console for visibility
         console.print(
-            f"[bold blue]Extracting data from Partie file:[/] [cyan]{partie_filename}[/]"
+            f"[bold blue]Extracting {description} using structured output model:[/] [cyan]{model}[/]"
         )
+        # Log operation in background
+        logger.info(f"Extracting {description} using structured output model: {model}")
+
+        litellm.enable_json_schema_validation = True
+        litellm.set_verbose = True  # see the raw request made by litellm
 
         try:
             response = completion(
-                model=self.model,
+                model=model,
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
+                    {"role": "user", "content": formatted_user_prompt},
                 ],
-                api_key=self.api_key,
                 base_url=self.base_url,
-                temperature=0.1,
-                response_format={"type": "json_object"},
+                temperature=temperature,
+                response_format=response_model,  # Use Pydantic model for structured output
+                # temperature=0.2,
             )
 
             end_time = time.time()
             duration = end_time - start_time
 
-            # Track cost if enabled
-            if self.cost_tracking_enabled and self.cost_tracker:
-                input_tokens = response.usage.prompt_tokens
-                output_tokens = response.usage.completion_tokens
-                self.cost_tracker.add_request(
-                    model=self.model,
-                    input_tokens=input_tokens,
-                    output_tokens=output_tokens,
-                    duration=duration,
-                )
-                console.print(
-                    f"[bold green]Request completed:[/] {input_tokens} input tokens, {output_tokens} output tokens"
-                )
-                console.print(
-                    f"[bold green]Estimated cost:[/] ${self.cost_tracker.calculate_cost(self.model, input_tokens, output_tokens):.6f}"
-                )
-
-            # Print raw response content for debugging
-            raw_content = response.choices[0].message.content
-            console.print("[bold yellow]Raw response content:[/]")
-            console.print(raw_content)
-
-            # Parse the JSON response
-            parsed_json = json.loads(raw_content)
-
-            # Handle the case where the data is nested under a 'data' key
-            if "data" in parsed_json and isinstance(parsed_json["data"], dict):
-                result = parsed_json["data"]
-                console.print("[yellow]Note: Data was nested under 'data' key[/]")
-            else:
-                result = parsed_json
-
-            # Validate the required fields
-            if "bales" not in result:
-                raise ValueError("Missing 'bales' key in result")
-            if "totals" not in result:
-                raise ValueError("Missing 'totals' key in result")
-
-            console.print(
-                f"[bold green]Successfully extracted data from[/] [cyan]{partie_filename}[/]"
-            )
-            return result
-
-        except Exception as e:
-            console.print(
-                f"[bold red]Error extracting data from {partie_filename}:[/] {str(e)}",
-                style="red",
-            )
-            raise ValueError(f"Error extracting data from {partie_filename}: {str(e)}")
-
-    def extract_wahrheit_data(self, content: str) -> Dict[str, Any]:
-        """
-        Extract data from Wahrheitsdatei content using AI
-
-        Note: There is a known issue with tare weights in some input files. The AI extraction
-        correctly processes what's in the files, but client files sometimes contain incorrect
-        tare weights. This is a data source issue, not an extraction issue.
-        Last updated: 2024-02-24
-        """
-        start_time = time.time()
-
-        system_message = """You are a helpful data extraction assistant. Your task is to extract structured data from CSV files used in the down/feather shipping industry.
-
-Instructions for extracting data from Wahrheitsdatei (truth file):
-
-INVOICE NUMBER - CRITICAL INSTRUCTIONS:
-- DO NOT extract the invoice number from the first line that contains "V-LIEF#######"
-- The CORRECT invoice number is a standalone 7-digit number that appears BELOW the main data table
-- It typically appears a few empty lines after the last product entry
-- Look for a line that ONLY contains a 7-digit number without any prefix or text around it
-
-PRODUCT DESCRIPTION - CRITICAL INSTRUCTIONS:
-- ONLY use the "Beschreibung 2" field for product descriptions, NOT the "Beschreibung" field
-- "Beschreibung 2" contains the CAPITALIZED product names (e.g., "GRS RECYCLED GREY DOWN")
-- "Beschreibung" contains lowercase descriptions with percentages (e.g., "GRS recycled grey down abt. 57%")
-- You MUST extract ONLY the "Beschreibung 2" values for the product_map
-
-Example layout showing proper field extraction:
-```
-V-LIEF2210332 Allied Feather & Down Corporation - Geb. Verkaufslieferung
-Art  Nr.  Virtuelle Partie  Beschreibung                      Beschreibung 2            ...
-Artikel  33906M  33906  GRS recycled grey down abt. 75%  GRS RECYCLED GREY DOWN     ...
-Artikel  33876M  33876  GRS washed recycled grey down... GRS WASHED RECYCLED GREY DOWN...
-[Several empty lines may appear here]
-2210331    <--- THIS is the correct invoice number to extract (standalone number)
-CAIU 427340-6
-```
-
-For the example above, your product map should be:
-{
-  "33906": "GRS RECYCLED GREY DOWN",
-  "33876": "GRS WASHED RECYCLED GREY DOWN"
-}
-
-OTHER EXTRACTION INSTRUCTIONS:
-1. Look for container information, typically in the format "CAIU ######-#" or similar
-2. For each "Partie" (lot) number mentioned, extract its corresponding "Beschreibung 2" description
-3. Return data in this format:
-   {
-     "container_no": "CONTAINER-NUMBER",
-     "invoice_no": "INVOICE-NUMBER",
-     "product_map": {
-       "33906": "GRS RECYCLED GREY DOWN",
-       "33876": "GRS WASHED RECYCLED GREY DOWN"
-     }
-   }
-
-VALIDATION STEP:
-Before returning your response, verify that:
-1. The invoice number is a standalone 7-digit number that appears AFTER the product listings
-2. Product descriptions in the product_map are ONLY from the "Beschreibung 2" column (capitalized descriptions)
-3. You are NOT including any values from the "Beschreibung" column"""
-
-        user_message = f"""Extract the structured data from this Wahrheitsdatei content, focusing on container number, invoice number, and product descriptions for each Partie number. 
-Remember:
-1. The invoice number is the standalone 7-digit number that appears BELOW the table
-2. Use ONLY the "Beschreibung 2" column (CAPITALIZED descriptions) for the product map, NOT the "Beschreibung" column
-
-```
-{content}
-```
-        """
-
-        console.print("[bold blue]Extracting data from Wahrheitsdatei[/]")
-
-        try:
-            response = completion(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": system_message},
-                    {"role": "user", "content": user_message},
-                ],
-                api_key=self.api_key,
-                base_url=self.base_url,
-                temperature=0.1,
-                response_format={"type": "json_object"},
-            )
-
-            end_time = time.time()
-            duration = end_time - start_time
+            # Log the completion time (debug level only)
+            logger.debug(f"AI completion for {description} took {duration:.2f}s")
 
             # Track cost if enabled
             if self.cost_tracking_enabled and self.cost_tracker:
                 input_tokens = response.usage.prompt_tokens
                 output_tokens = response.usage.completion_tokens
+
+                # Calculate cost using litellm's completion_cost function
+                cost = completion_cost(completion_response=response)
+
                 self.cost_tracker.add_request(
-                    model=self.model,
+                    model=model,
                     input_tokens=input_tokens,
                     output_tokens=output_tokens,
                     duration=duration,
+                    cost=cost,
                 )
+
+                # Cost information - use console for visibility only
                 console.print(
                     f"[bold green]Request completed:[/] {input_tokens} input tokens, {output_tokens} output tokens"
                 )
+                console.print(f"[bold green]Estimated cost:[/] ${cost:.6f}")
+
+            console.print("Raw response for debugging:")
+            console.print(response.choices[0])
+
+            # Get the raw JSON string from the response
+            json_string = response.choices[0].message.content
+
+            # Parse the JSON string into a Python dictionary
+            json_data = json.loads(json_string)
+
+            # Validate the parsed JSON with the Pydantic model
+            try:
+                # Try Pydantic v2 method first
+                parsed_result = response_model.model_validate(json_data)
+            except AttributeError:
                 console.print(
-                    f"[bold green]Estimated cost:[/] ${self.cost_tracker.calculate_cost(self.model, input_tokens, output_tokens):.6f}"
+                    f"[bold red]Error validating JSON with Pydantic:[/] {str(e)}",
+                    style="red",
                 )
+                logger.error(f"Error validating JSON with Pydantic: {str(e)}")
+                console.print(f"JSON data: {json_data}")
+                raise ValueError(f"Error validating JSON with Pydantic: {str(e)}")
 
-            # Print raw response content for debugging
-            raw_content = response.choices[0].message.content
-            console.print("[bold yellow]Raw response content:[/]")
-            console.print(raw_content)
-
-            # Parse the JSON response
-            parsed_json = json.loads(raw_content)
-            result = None
-
-            # Handle different response formats
-            if "data" in parsed_json and isinstance(parsed_json["data"], dict):
-                result = parsed_json["data"]
-                console.print("[yellow]Note: Data was nested under 'data' key[/]")
-            elif "json_input" in parsed_json and isinstance(
-                parsed_json["json_input"], dict
-            ):
-                result = parsed_json["json_input"]
-                console.print("[yellow]Note: Data was nested under 'json_input' key[/]")
-            else:
-                result = parsed_json
-
-            # Validate the required fields
-            if "product_map" not in result:
-                raise ValueError("Missing 'product_map' key in result")
-            if "container_no" not in result:
-                raise ValueError("Missing 'container_no' key in result")
-            if "invoice_no" not in result:
-                raise ValueError("Missing 'invoice_no' key in result")
-
+            console.print(parsed_result)
+            # Success message - use console for user feedback
             console.print(
-                "[bold green]Successfully extracted data from Wahrheitsdatei[/]"
+                f"[bold green]Successfully extracted {description} with structured output[/]"
             )
-            return result
+            # Log success
+            logger.info(f"Successfully extracted {description} with structured output")
 
-        except Exception as e:
+            return parsed_result
+
+        except OpenAIError as e:
+            # Handle OpenAI/LiteLLM specific errors
+            error_msg = f"LiteLLM error extracting {description}: {str(e)}"
             console.print(
-                f"[bold red]Error extracting data from Wahrheitsdatei:[/] {str(e)}",
+                f"[bold red]{error_msg}[/]",
                 style="red",
             )
-            raise ValueError(f"Error extracting data from Wahrheitsdatei: {str(e)}")
-
-
-class CostTracker:
-    """Tracks the cost of AI requests"""
-
-    # Cost per 1M tokens (in USD) for different models
-    COST_PER_MILLION_TOKENS = {
-        "anthropic/claude-3-5-sonnet-20240620": {"input": 3.0, "output": 15.0},
-        "anthropic/claude-3-sonnet-20240229": {"input": 3.0, "output": 15.0},
-        "anthropic/claude-3-opus-20240229": {"input": 15.0, "output": 75.0},
-        "openai/gpt-4o": {"input": 5.0, "output": 15.0},
-        "openai/gpt-3.5-turbo": {"input": 0.5, "output": 1.5},
-    }
-
-    def __init__(self):
-        self.requests = []
-        self.total_cost = 0.0
-        console.print("[bold green]Cost tracking enabled[/]")
-
-    def add_request(
-        self, model: str, input_tokens: int, output_tokens: int, duration: float
-    ):
-        """Add a request to the tracker"""
-        cost = self.calculate_cost(model, input_tokens, output_tokens)
-        self.requests.append(
-            {
-                "model": model,
-                "input_tokens": input_tokens,
-                "output_tokens": output_tokens,
-                "cost": cost,
-                "duration": duration,
-                "timestamp": time.time(),
-            }
-        )
-        self.total_cost += cost
-
-    def calculate_cost(
-        self, model: str, input_tokens: int, output_tokens: int
-    ) -> float:
-        """Calculate the cost of a request"""
-        if model not in self.COST_PER_MILLION_TOKENS:
+            logger.error(error_msg, exc_info=True)
+            raise ValueError(error_msg)
+        except Exception as e:
+            # Handle other errors
+            error_msg = f"Error extracting {description}: {str(e)}"
             console.print(
-                f"[bold yellow]Warning:[/] Unknown model {model}, using anthropic/claude-3-5-sonnet-20240620 pricing"
+                f"[bold red]{error_msg}[/]",
+                style="red",
             )
-            model = "anthropic/claude-3-5-sonnet-20240620"
-
-        input_cost = (input_tokens / 1_000_000) * self.COST_PER_MILLION_TOKENS[model][
-            "input"
-        ]
-        output_cost = (output_tokens / 1_000_000) * self.COST_PER_MILLION_TOKENS[model][
-            "output"
-        ]
-
-        return input_cost + output_cost
-
-    def get_total_cost(self) -> float:
-        """Get the total cost of all requests"""
-        return self.total_cost
-
-    def get_request_count(self) -> int:
-        """Get the number of requests made"""
-        return len(self.requests)
-
-    def get_token_usage(self) -> Dict[str, int]:
-        """Get the total token usage"""
-        input_tokens = sum(req["input_tokens"] for req in self.requests)
-        output_tokens = sum(req["output_tokens"] for req in self.requests)
-        return {
-            "input_tokens": input_tokens,
-            "output_tokens": output_tokens,
-            "total_tokens": input_tokens + output_tokens,
-        }
-
-    def print_summary(self):
-        """Print a summary of the cost tracking"""
-        if not self.requests:
-            console.print("[bold yellow]No requests tracked yet[/]")
-            return
-
-        token_usage = self.get_token_usage()
-        console.print("\n[bold green]Cost Tracking Summary:[/]")
-        console.print(f"Total requests: {self.get_request_count()}")
-        console.print(f"Total input tokens: {token_usage['input_tokens']:,}")
-        console.print(f"Total output tokens: {token_usage['output_tokens']:,}")
-        console.print(f"Total tokens: {token_usage['total_tokens']:,}")
-        console.print(f"Total cost: ${self.total_cost:.6f}")
+            logger.error(error_msg, exc_info=True)
+            raise ValueError(error_msg)

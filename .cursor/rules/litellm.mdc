@@ -614,36 +614,12 @@ alwaysApply: false
         - `gpt-4o-mini-2024-07-18` - Specific version of GPT-4o-mini
         - `gpt-4o` - OpenAI's multimodal GPT-4o model
         - `gpt-4o-2024-08-06` - Specific version of GPT-4o
-        - `gpt-4o-2024-05-13` - Specific version of GPT-4o
-        - `gpt-4-turbo` - GPT-4 Turbo
-        - `gpt-4-turbo-preview` - Preview version of GPT-4 Turbo
-        - `gpt-4-0125-preview` - Specific version of GPT-4
-        - `gpt-4-1106-preview` - Specific version of GPT-4
-        - `gpt-3.5-turbo-1106` - GPT-3.5 Turbo version
-        - `gpt-3.5-turbo` - Standard GPT-3.5 Turbo
-        - `gpt-3.5-turbo-0301` - Specific version of GPT-3.5 Turbo
-        - `gpt-3.5-turbo-0613` - Specific version of GPT-3.5 Turbo
-        - `gpt-3.5-turbo-16k` - GPT-3.5 Turbo with 16k context window
-        - `gpt-3.5-turbo-16k-0613` - Specific version of GPT-3.5 Turbo with 16k context
-        - `gpt-4` - Standard GPT-4
-        - `gpt-4-0314` - Specific version of GPT-4
-        - `gpt-4-0613` - Specific version of GPT-4
-        - `gpt-4-32k` - GPT-4 with 32k context window
-        - `gpt-4-32k-0314` - Specific version of GPT-4 with 32k context
-        - `gpt-4-32k-0613` - Specific version of GPT-4 with 32k context
-        - `gpt-4-vision-preview` - GPT-4 with vision capabilities
       </openai_models>
 
       <anthropic_models>
         <subsection_title>### Anthropic Models</subsection_title>
         - `claude-3.5-sonnet-20240620` - Claude 3.5 Sonnet
-        - `claude-3-haiku-20240307` - Claude 3 Haiku
-        - `claude-3-opus-20240229` - Claude 3 Opus
-        - `claude-3-sonnet-20240229` - Claude 3 Sonnet
-        - `claude-2.1` - Claude 2.1
-        - `claude-2` - Claude 2
-        - `claude-instant-1.2` - Claude Instant 1.2
-        - `claude-instant-1` - Claude Instant 1
+        - `claude-3-5-haiku-20241022` - Claude 3.5 Haiku
       </anthropic_models>
 
       <deepseek_models>

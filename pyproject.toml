@@ -18,6 +18,7 @@ aiofiles = "^24.1.0"
 imap-tools = "^1.10.0"
 pydantic-settings = "^2.8.0"
 litellm = "^1.61.15"
+openai = "^1.64.0"
 
 
 [build-system]

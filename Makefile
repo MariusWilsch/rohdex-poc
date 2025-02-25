@@ -9,6 +9,14 @@ GREEN = \033[0;32m
 RED = \033[0;31m
 NC = \033[0m # No Color
 
+
+help:
+	@echo "Available targets:"
+	@echo "  run: Start the FastAPI server"
+	@echo "  process-email: Process Rohdex test emails"
+	@echo "  clean: Clean up generated files"
+	@echo "  gen-requirements: Generate `requirements.txt` using poetry"
+
 # Run the FastAPI server
 run:
 	@echo "$(GREEN)Starting FastAPI server on port $(PORT)...$(NC)"
@@ -27,3 +35,6 @@ process-email:
 clean:
 	@echo "$(GREEN)Cleaning up...$(NC)"
 	@rm -f generated_packing_list.csv
+
+gen-requirements:
+	poetry export -f requirements.txt --output requirements.txt --without-hashes

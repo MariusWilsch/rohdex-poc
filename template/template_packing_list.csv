@@ -1,0 +1,15 @@
+Packing List in accordance with Invoice No. {INVOICE_NO},,,,,
+,,,,,
+Container No. {CONTAINER_NO},,,,CIF LOS ANGELES,
+,,,,,
+{BEGIN_PRODUCT_SECTION}
+{PRODUCT_DESCRIPTION},,,,,
+ acc. to Sample No. {SAMPLE_NO},,,,,
+,,,,,
+Bale No.,Gross weight,Tare:,Net weight:,Faktor,lbs
+{BALES_DATA}
+{BALES_COUNT} Bales,{TOTAL_GROSS} kg,{TOTAL_TARE} kg,{TOTAL_NET} kg,,{TOTAL_LBS}lbs
+,{TOTAL_GROSS_LBS}lbs,,{TOTAL_NET_LBS}lbs,,
+,,,,,
+,,,,,
+{END_PRODUCT_SECTION} 
