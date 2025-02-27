@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.routes.v1 import packing_list, dashboard
+from app.api.routes.v1 import packing_list, health
 from app.services.monitoring import system_monitor
 from app.services.email_service import EmailService
 from app.core.config import get_settings
@@ -43,4 +43,6 @@ async def lifespan(app: FastAPI):
 # Create FastAPI app with lifespan handler
 app = FastAPI(title="Rohdex POC", lifespan=lifespan)
 app.include_router(packing_list.router, prefix="/api/v1")
-app.include_router(dashboard.router, prefix="/api/v1")
+app.include_router(health.router, prefix="/api/v1")
+# Dashboard routes disabled as requested
+# app.include_router(dashboard.router, prefix="/api/v1")

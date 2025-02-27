@@ -17,7 +17,7 @@ class Settings(BaseSettings):
 
     # Email Polling Configuration
     EMAIL_POLLING_ENABLED: bool = True
-    EMAIL_POLLING_INTERVAL: int = 30  # seconds (30 seconds)
+    EMAIL_POLLING_INTERVAL: int = 2  # seconds (2 seconds)
     EMAIL_LABEL_FILTER: str = "Rohdex-Automation"
     EMAIL_MAX_FETCH: int = 2  # Max emails to process per polling cycle
 

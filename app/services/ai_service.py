@@ -47,7 +47,7 @@ class AIService:
         system_prompt: str,
         user_prompt: str,
         response_model: Type[T],
-        model: str = "gpt-4o-mini",
+        model: str = "gpt-4o",
         temperature: float = 0.1,
         description: str = "data",
     ) -> T:
@@ -79,7 +79,8 @@ class AIService:
         logger.info(f"Extracting {description} using structured output model: {model}")
 
         litellm.enable_json_schema_validation = True
-        litellm.set_verbose = True  # see the raw request made by litellm
+
+        console.print(formatted_user_prompt)
 
         try:
             response = completion(

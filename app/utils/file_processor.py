@@ -37,9 +37,6 @@ async def process_partie(content: bytes, filename: str = None) -> Dict:
         # Convert bytes to string
         content_str = content.decode("utf-8")
 
-        # Create metadata dict for monitoring
-        metadata = {"filename": filename}
-
         # Execute with self-healing retry logic
         def extract():
             # Use structured data extraction with Pydantic model
@@ -110,7 +107,7 @@ async def process_partie(content: bytes, filename: str = None) -> Dict:
         raise
 
 
-async def load_wahrheit(content: bytes) -> Tuple[Dict, str, str]:
+async def load_wahrheit(content: bytes, filename: str = None) -> Tuple[Dict, str, str]:
     """
     Load Wahrheitsdatei mapping from bytes content using AI with self-healing capabilities
 
@@ -153,16 +150,28 @@ async def load_wahrheit(content: bytes) -> Tuple[Dict, str, str]:
         # Use attribute access (result.products) instead of dictionary access (result.get("products", []))
         # The products attribute is a list of ProductInfo Pydantic models
         for product in result.products:
-            # Use attribute access (product.product_code, product.description)
-            # instead of dictionary access (product["product_code"], product["description"])
+            # Convert product_code to string if it's an integer
+            product_code = (
+                str(product.product_code) if product.product_code is not None else ""
+            )
+            product_description = (
+                product.description if product.description is not None else ""
+            )
+
             # Store both the full product code and the numeric part (without suffix)
-            product_map[product.product_code] = product.description
+            product_map[product_code] = product_description
 
             # Also store with just the numeric part to handle suffix mismatches (e.g., 33906M vs 33906G)
-            if product.product_code and len(product.product_code) > 1:
-                numeric_part = "".join(c for c in product.product_code if c.isdigit())
+            if product_code and len(product_code) > 1:
+                numeric_part = "".join(c for c in product_code if c.isdigit())
                 if numeric_part:
-                    product_map[numeric_part] = product.description
+                    product_map[numeric_part] = product_description
+
+        # Convert container_no and invoice_no to strings if they're integers
+        container_no = (
+            str(result.container_no) if result.container_no is not None else ""
+        )
+        invoice_no = str(result.invoice_no) if result.invoice_no is not None else ""
 
         # After successful execution, record additional metadata
         system_monitor.record_request(
@@ -173,22 +182,20 @@ async def load_wahrheit(content: bytes) -> Tuple[Dict, str, str]:
             metadata={
                 "product_count": len(product_map),
                 # Use getattr with a default value for safety
-                "container_no": getattr(result, "container_no", "Unknown"),
+                "container_no": container_no,
             },
         )
 
         # Log results
         console.print("\n[bold green]Wahrheit Processing Results:[/]")
-        console.print(
-            f"[bold green]Container Number:[/] [cyan]{result.container_no}[/]"
-        )
-        console.print(f"[bold green]Invoice Number:[/] [cyan]{result.invoice_no}[/]")
+        console.print(f"[bold green]Container Number:[/] [cyan]{container_no}[/]")
+        console.print(f"[bold green]Invoice Number:[/] [cyan]{invoice_no}[/]")
         console.print("[bold green]Product Mappings:[/]")
         for partie, desc in product_map.items():
             console.print(f"  [green]Partie {partie}:[/] [cyan]{desc}[/]")
 
         # Return the product map and container/invoice numbers using attribute access
-        return product_map, result.container_no, result.invoice_no
+        return product_map, container_no, invoice_no
     except Exception as e:
         total_duration = time.time() - start_time
         error_msg = str(e)
@@ -231,7 +238,10 @@ def format_bales_data(bales: List[Dict]) -> str:
 
 
 async def generate_packing_list(
-    partie_contents: List, wahrheit_content: bytes, template_content: str
+    partie_contents: List,
+    wahrheit_content: bytes,
+    template_content: str,
+    wahrheit_filename: str = None,
 ) -> str:
     """Generate packing list from partie, wahrheit and template files
 
@@ -239,6 +249,7 @@ async def generate_packing_list(
         partie_contents: List of objects with content and filename properties
         wahrheit_content: Bytes content of wahrheit file
         template_content: String content of template file
+        wahrheit_filename: Filename of the wahrheit file (optional)
 
     Returns:
         String content of generated packing list
@@ -248,7 +259,9 @@ async def generate_packing_list(
     try:
         # Load Wahrheitsdatei using AI
         console.print("[bold blue]Processing Wahrheitsdatei...[/]")
-        product_map, container_no, invoice_no = await load_wahrheit(wahrheit_content)
+        product_map, container_no, invoice_no = await load_wahrheit(
+            wahrheit_content, wahrheit_filename
+        )
 
         # Find the start and end of the product section template
         start = template_content.find("{BEGIN_PRODUCT_SECTION}")

@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  rohdex-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./logs:/app/logs
+      - ./context:/app/context
+    env_file:
+      - .env
+    environment:
+      - EMAIL_POLLING_ENABLED=${EMAIL_POLLING_ENABLED:-true}
+      - EMAIL_POLL_INTERVAL=${EMAIL_POLL_INTERVAL:-60}
+      - LITELLM_MODEL=${LITELLM_MODEL:-anthropic/claude-3-5-sonnet-20240620}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

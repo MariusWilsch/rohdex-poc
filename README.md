@@ -14,6 +14,7 @@ This project uses LiteLLM to abstract away the complexity of different AI models
 - **Cost tracking**: Monitors token usage and associated costs
 - **Self-healing capabilities**: Implements retry mechanisms with exponential backoff for resilience against transient failures
 - **Monitoring dashboard**: Provides real-time insights into system performance and error handling
+- **Email processing**: Automatically processes emails with packing list attachments and sends back processed results
 
 ### Configuration
 
@@ -24,6 +25,16 @@ The AI integration is configured through environment variables:
 ANTHROPIC_API_KEY=your-anthropic-api-key
 LITELLM_MODEL=anthropic/claude-3-5-sonnet-20240620
 LITELLM_BASE_URL=optional-proxy-url  # Only needed when using a proxy
+
+# Email Configuration (for automatic email processing)
+EMAIL_POLLING_ENABLED=true
+EMAIL_POLL_INTERVAL=60
+EMAIL_IMAP_SERVER=imap.example.com
+EMAIL_IMAP_PORT=993
+EMAIL_SMTP_SERVER=smtp.example.com
+EMAIL_SMTP_PORT=587
+EMAIL_USERNAME=your-email@example.com
+EMAIL_PASSWORD=your-email-password
 ```
 
 ### Components
@@ -33,7 +44,7 @@ LITELLM_BASE_URL=optional-proxy-url  # Only needed when using a proxy
    - Extracts data from different file types
    - Tracks costs and token usage
 
-2. **CostTracker**
+2. **CostTracker** (`app/services/cost_tracker.py`)
    - Tracks token consumption and costs
    - Provides usage summaries and cost reporting
 
@@ -47,6 +58,16 @@ LITELLM_BASE_URL=optional-proxy-url  # Only needed when using a proxy
    - Records errors, retries, and success rates
    - Calculates performance metrics
    - Provides a web-based dashboard for monitoring
+
+5. **PackingListService** (`app/services/packing_list_service.py`)
+   - Processes partie and wahrheit files
+   - Generates packing lists with structured data
+
+6. **EmailService** (`app/services/email_service.py`)
+   - Polls for new emails with attachments
+   - Processes attachments using the AI service
+   - Sends back processed results
+   - Supports both IMAP and SMTP protocols
 
 ### Testing
 
@@ -103,6 +124,18 @@ http://localhost:8000/api/v1/dashboard/metrics
 
 This is useful for integrating with external monitoring tools.
 
+### Email Processing
+
+The system can automatically process emails with packing list attachments:
+
+1. Monitors a specified email inbox for new messages
+2. Extracts partie and wahrheit file attachments
+3. Processes them using the AI service
+4. Sends back the processed packing list
+5. Marks processed emails as read
+
+To enable email processing, configure the email settings in your `.env` file and ensure `EMAIL_POLLING_ENABLED=true`.
+
 ### Known Issues
 
 - **Tare Weight Discrepancies**: There are known discrepancies in tare weights in some client input files. The AI extraction accurately processes what's in the files, but the source files occasionally contain incorrect tare weights (typically using 2.00 kg instead of the correct 4.00-4.40 kg values). This is a data source issue, not an extraction issue. (Last updated: 2024-02-24)
@@ -113,7 +146,7 @@ This is useful for integrating with external monitoring tools.
 
 1. Clone the repository
 2. Install dependencies with Poetry: `poetry install`
-3. Copy `.env.example` to `.env` and add your Anthropic API key
+3. Copy `.env.example` to `.env` and add your Anthropic API key and other configuration
 4. Run tests to verify your setup: `python test_ai_integration.py all`
 5. Start the application: `make run`
 6. Access the monitoring dashboard at `http://localhost:8000/api/v1/dashboard/monitoring`

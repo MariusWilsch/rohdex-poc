@@ -5,11 +5,80 @@ from app.utils.file_processor import (
     generate_packing_list,
 )
 from rich.console import Console
+import pandas as pd
+from io import BytesIO
 
 console = Console()
 
 
 class PackingListService:
+    def _process_excel_partie(self, content: bytes, filename: str) -> bytes:
+        """Process an Excel partie file and convert it to CSV format.
+
+        Args:
+            content: The raw bytes content of the Excel file
+            filename: The filename for logging purposes
+
+        Returns:
+            bytes: The CSV content as bytes
+        """
+        console.print(f"[green]Processing Excel Partie file:[/] [cyan]{filename}[/]")
+        # Convert Excel to CSV format
+        df = pd.read_excel(BytesIO(content))
+        # Convert to CSV bytes
+        return df.to_csv(index=False).encode("utf-8")
+
+    def _process_excel_wahrheit(self, content: bytes, filename: str) -> bytes:
+        """Process an Excel wahrheit file, extract the V-LIEF sheet, and convert to CSV format.
+
+        Args:
+            content: The raw bytes content of the Excel file
+            filename: The filename for logging purposes
+
+        Returns:
+            bytes: The CSV content as bytes from the V-LIEF sheet
+        """
+        console.print(f"[green]Processing Excel Wahrheit file:[/] [cyan]{filename}[/]")
+        # Read all sheet names
+        excel_file = BytesIO(content)
+        xls = pd.ExcelFile(excel_file)
+
+        # Find the sheet that starts with "V-LIEF"
+        v_lief_sheet = None
+        for sheet_name in xls.sheet_names:
+            if sheet_name.startswith("V-LIEF"):
+                v_lief_sheet = sheet_name
+                break
+
+        # If no V-LIEF sheet found, use the first sheet
+        if not v_lief_sheet and len(xls.sheet_names) > 0:
+            v_lief_sheet = xls.sheet_names[0]
+            console.print(
+                "[yellow]Warning: No sheet starting with V-LIEF found, using first sheet[/]"
+            )
+
+        if not v_lief_sheet:
+            raise ValueError("No sheets found in Excel file")
+
+        # Read the specific sheet
+        df = pd.read_excel(excel_file, sheet_name=v_lief_sheet)
+
+        # Convert to CSV bytes
+        csv_content = df.to_csv(index=False).encode("utf-8")
+        console.print(f"[green]Successfully extracted sheet: {v_lief_sheet}[/]")
+        return csv_content
+
+    def _is_excel_file(self, filename: str) -> bool:
+        """Check if a file is an Excel file based on its extension.
+
+        Args:
+            filename: The filename to check
+
+        Returns:
+            bool: True if the file is an Excel file, False otherwise
+        """
+        return filename.lower().endswith((".xlsx", ".xls"))
+
     async def generate(
         self,
         partie_files: list[UploadFile],
@@ -41,10 +110,19 @@ class PackingListService:
         partie_contents = []
         for pfile in partie_files:
             content = await pfile.read()
+
+            # Process Excel files if needed
+            if self._is_excel_file(pfile.filename):
+                processed_content = self._process_excel_partie(content, pfile.filename)
+            else:
+                processed_content = content
+
             # Create a custom object that has both content and filename
             partie_contents.append(
                 type(
-                    "PartieFile", (), {"content": content, "filename": pfile.filename}
+                    "PartieFile",
+                    (),
+                    {"content": processed_content, "filename": pfile.filename},
                 )()
             )
             await pfile.seek(0)  # Reset file pointer for potential reuse
@@ -52,6 +130,13 @@ class PackingListService:
 
         # Read wahrheit file into memory
         wahrheit_content = await wahrheit_file.read()
+
+        # Process Excel wahrheit file if needed
+        if self._is_excel_file(wahrheit_file.filename):
+            wahrheit_content = self._process_excel_wahrheit(
+                wahrheit_content, wahrheit_file.filename
+            )
+
         await wahrheit_file.seek(0)  # Reset file pointer for potential reuse
         console.print(
             f"[green]Loaded wahrheit file:[/] [cyan]{wahrheit_file.filename}[/]"
@@ -70,6 +155,7 @@ class PackingListService:
             partie_contents=partie_contents,
             wahrheit_content=wahrheit_content,
             template_content=template_content,
+            wahrheit_filename=wahrheit_file.filename,
         )
 
         console.print("[bold green]Packing list generation completed successfully![/]")

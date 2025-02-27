@@ -18,6 +18,7 @@ from typing import Optional, Dict, List, Callable, Any
 
 # Get logger from singleton
 logger = LoggerSingleton.get_logger()
+console = LoggerSingleton.get_console()
 
 
 def run_async(async_func):
@@ -198,29 +199,35 @@ class EmailService:
 
     def process_attachments(self, msg) -> dict:
         """Process attachments from an email message"""
-        files = {"partie_files": [], "wahrheit_file": None, "template_file": None}
+        files = {"partie_files": [], "wahrheit_file": None}
 
         logger.debug(f"Processing {len(msg.attachments)} attachments")
 
         for att in msg.attachments:
+            # Get original filename (preserve case for passing to processing functions)
+            console.print(f"Processing attachment: {att}")
+            original_filename = att.filename
+            # filename to lowercase for checking
+            lower_filename = original_filename.lower()
             # Convert attachment to UploadFile
-            file = UploadFile(filename=att.filename, file=io.BytesIO(att.payload))
+            file = UploadFile(
+                filename=original_filename,
+                file=io.BytesIO(att.payload),
+            )
 
-            if att.filename.startswith("Partie"):
+            # Check for partie files
+            if "partie" in lower_filename:
                 files["partie_files"].append(file)
-                logger.debug(f"Added as Partie file: {att.filename}")
-            elif "Wahrheit" in att.filename:
+                logger.debug(f"Added as Partie file: {original_filename}")
+            # Check for wahrheit files (including Excel files with V-LIEF in the name)
+            elif "wahrheit" in lower_filename:
                 files["wahrheit_file"] = file
-                logger.debug(f"Added as Wahrheit file: {att.filename}")
-            elif "template" in att.filename:
-                files["template_file"] = file
-                logger.debug(f"Added as template file: {att.filename}")
+                logger.debug(f"Added as Wahrheit file: {original_filename}")
 
         # Log summary of processed files
         logger.debug(
             f"Processed attachments: {len(files['partie_files'])} Partie files, "
-            f"Wahrheit: {'Present' if files['wahrheit_file'] else 'Missing'}, "
-            f"Template: {'Present' if files['template_file'] else 'Missing'}"
+            f"Wahrheit: {'Present' if files['wahrheit_file'] else 'Missing'}"
         )
 
         return files
