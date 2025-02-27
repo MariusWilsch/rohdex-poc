@@ -18,7 +18,7 @@ echo -e "${YELLOW}--- Container status ---${NC}"
 docker compose ps
 
 echo -e "${YELLOW}--- Testing health endpoint ---${NC}"
-HEALTH_RESPONSE=$(curl -s http://localhost:8000/api/v1/health)
+HEALTH_RESPONSE=$(curl -s http://localhost:8001/api/v1/health)
 echo $HEALTH_RESPONSE
 
 if [[ $HEALTH_RESPONSE == *"healthy"* ]]; then
@@ -35,6 +35,6 @@ docker compose logs --tail=10
 echo -e "${YELLOW}--- Test complete ---${NC}"
 echo ""
 echo -e "${GREEN}The Docker setup is working correctly!${NC}"
-echo -e "You can access the health check at: http://localhost:8000/api/v1/health"
+echo -e "You can access the health check at: http://localhost:8001/api/v1/health"
 echo -e "To view logs: ${YELLOW}docker compose logs -f${NC}"
 echo -e "To stop the container: ${YELLOW}docker compose down${NC}" 
