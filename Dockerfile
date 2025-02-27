@@ -33,6 +33,9 @@ RUN mkdir -p /app/logs /app/context
 # Copy project
 COPY . .
 
+# Add openpyxl for Excel processing
+RUN pip install openpyxl
+
 # Expose the port the app runs on
 EXPOSE 8000
 
@@ -41,5 +44,5 @@ RUN adduser --disabled-password --gecos "" appuser
 RUN chown -R appuser:appuser /app
 USER appuser
 
-# Entry point
-CMD ["make", "run"] 
+# Entry point - modify to bind to all interfaces
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port 8000"] 
